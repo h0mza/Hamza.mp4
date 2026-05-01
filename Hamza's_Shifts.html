@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f0f0f">
+<title>شيفتات حمزة</title>
+<link rel="manifest" href="manifest.json">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap');
+:root {
+  --bg:#0f0f0f; --surface:#1a1a1a; --surface2:#242424; --surface3:#2e2e2e;
+  --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.15);
+  --text:#f0f0f0; --text2:#888; --text3:#555;
+  --blue:#4A9EFF; --blue-dim:rgba(74,158,255,0.12);
+  --green:#4CAF7D; --green-dim:rgba(76,175,125,0.12);
+  --amber:#F5A623; --amber-dim:rgba(245,166,35,0.12);
+  --red:#FF6B6B; --red-dim:rgba(255,107,107,0.12);
+  --purple:#B57BFF; --purple-dim:rgba(181,123,255,0.12);
+  --radius:14px; --radius-sm:9px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;}
+.app{max-width:480px;margin:0 auto;}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--surface);border-top:0.5px solid var(--border2);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom);}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 8px;cursor:pointer;gap:3px;transition:color 0.15s;}
+.nav-item span{font-size:11px;font-weight:500;color:var(--text3);}
+.nav-item svg{width:22px;height:22px;stroke:var(--text3);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:stroke 0.15s;}
+.nav-item.active span{color:var(--blue);}
+.nav-item.active svg{stroke:var(--blue);}
+
+/* PAGES */
+.page{display:none;padding-bottom:80px;}
+.page.active{display:block;}
+
+/* HEADER */
+.header{padding:52px 20px 16px;background:linear-gradient(180deg,#1a1a1a 0%,transparent 100%);}
+.header-top{display:flex;justify-content:space-between;align-items:flex-start;}
+.header h1{font-size:26px;font-weight:700;letter-spacing:-0.5px;}
+.header p{font-size:13px;color:var(--text2);margin-top:3px;}
+.salary-badge{background:var(--blue-dim);border:0.5px solid rgba(74,158,255,0.25);color:var(--blue);font-size:13px;font-weight:600;padding:6px 12px;border-radius:20px;white-space:nowrap;}
+
+/* MONTH NAV */
+.month-nav{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;}
+.nav-btn{background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius-sm);width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);font-size:16px;transition:background 0.15s;}
+.nav-btn:active{background:var(--surface2);}
+.month-title{font-size:18px;font-weight:600;}
+
+/* WEEKDAYS + CALENDAR */
+.weekdays{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;padding:0 12px 8px;}
+.weekdays span{font-size:12px;color:var(--text3);font-weight:500;}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:0 12px 12px;}
+.day-cell{border-radius:var(--radius-sm);padding:6px 2px 5px;text-align:center;cursor:pointer;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;border:0.5px solid transparent;transition:all 0.15s;position:relative;}
+.day-cell:active{transform:scale(0.95);}
+.day-cell.empty{cursor:default;pointer-events:none;}
+.day-cell.sunday{background:rgba(245,166,35,0.06);}
+.day-cell.today .day-num{background:var(--blue);color:#fff;border-radius:50%;}
+.day-cell.leave-selected{background:var(--purple-dim);border-color:rgba(181,123,255,0.3);}
+.day-num{font-size:13px;font-weight:600;color:var(--text);width:26px;height:26px;display:flex;align-items:center;justify-content:center;}
+.day-num.muted{color:var(--text3);}
+.shift-dot{font-size:8px;padding:2px 4px;border-radius:6px;font-weight:600;line-height:1.3;max-width:100%;}
+.dot-night{background:var(--blue-dim);color:var(--blue);}
+.dot-full{background:var(--green-dim);color:var(--green);}
+.dot-off-night{background:var(--amber-dim);color:var(--amber);}
+.dot-off-full{background:var(--red-dim);color:var(--red);}
+.dot-leave{background:var(--purple-dim);color:var(--purple);}
+
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 12px;}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+/* SUMMARY CARDS */
+.summary{margin:0 12px 12px;}
+.summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+.s-card{background:var(--surface);border-radius:var(--radius);padding:14px 16px;border:0.5px solid var(--border);}
+.s-card.clickable{cursor:pointer;transition:all 0.15s;}
+.s-card.clickable:active{background:var(--surface2);transform:scale(0.97);}
+.s-card.full{grid-column:1/-1;}
+.s-label{font-size:12px;color:var(--text2);}
+.s-val{font-size:20px;font-weight:700;margin-top:4px;}
+.s-val.blue{color:var(--blue);}
+.s-val.red{color:var(--red);}
+.s-val.green{color:var(--green);}
+.s-tap{font-size:10px;color:var(--text3);margin-top:3px;}
+
+/* SECTION TITLE */
+.section-title{font-size:13px;font-weight:600;color:var(--text2);padding:0 20px 8px;text-transform:uppercase;letter-spacing:0.5px;}
+
+/* LEAVE MODE BANNER */
+.leave-banner{margin:0 12px 12px;background:var(--purple-dim);border:0.5px solid rgba(181,123,255,0.3);border-radius:var(--radius);padding:12px 16px;}
+.leave-banner h4{font-size:14px;font-weight:600;color:var(--purple);margin-bottom:4px;}
+.leave-banner p{font-size:12px;color:var(--text2);line-height:1.6;}
+.leave-actions{display:flex;gap:8px;margin-top:10px;}
+.leave-btn{flex:1;padding:10px;border-radius:var(--radius-sm);border:none;font-family:'Cairo',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;}
+.leave-btn:active{transform:scale(0.97);}
+.leave-btn.confirm{background:var(--purple);color:#fff;}
+.leave-btn.cancel{background:var(--surface2);color:var(--text2);}
+
+/* HISTORY PAGE */
+.history-header{padding:52px 20px 16px;background:linear-gradient(180deg,#1a1a1a 0%,transparent 100%);}
+.history-header h1{font-size:26px;font-weight:700;}
+.history-header p{font-size:13px;color:var(--text2);margin-top:3px;}
+.month-card{margin:0 12px 10px;background:var(--surface);border-radius:var(--radius);border:0.5px solid var(--border);overflow:hidden;cursor:pointer;transition:all 0.15s;}
+.month-card:active{background:var(--surface2);}
+.month-card-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;}
+.month-card-title{font-size:15px;font-weight:600;}
+.month-card-total{font-size:15px;font-weight:700;color:var(--blue);}
+.month-card-body{padding:0 16px 14px;display:none;border-top:0.5px solid var(--border);}
+.month-card-body.open{display:block;}
+.stat-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:13px;}
+.stat-row:last-child{border-bottom:none;}
+.stat-label{color:var(--text2);}
+.stat-val{font-weight:600;}
+.stat-val.blue{color:var(--blue);}
+.stat-val.red{color:var(--red);}
+.stat-val.green{color:var(--green);}
+.stat-val.purple{color:var(--purple);}
+.export-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:12px;padding:11px;background:var(--surface2);border:0.5px solid var(--border2);border-radius:var(--radius-sm);cursor:pointer;font-family:'Cairo',sans-serif;font-size:13px;font-weight:600;color:var(--text2);transition:all 0.15s;}
+.export-btn:active{transform:scale(0.97);}
+.no-history{text-align:center;padding:40px 20px;color:var(--text3);font-size:14px;}
+
+/* LEAVE PAGE */
+.leave-page-header{padding:52px 20px 16px;background:linear-gradient(180deg,#1a1a1a 0%,transparent 100%);}
+.leave-page-header h1{font-size:26px;font-weight:700;}
+.leave-page-header p{font-size:13px;color:var(--text2);margin-top:3px;}
+.leave-form{margin:0 12px 12px;}
+.input-group{background:var(--surface);border-radius:var(--radius);border:0.5px solid var(--border);padding:14px 16px;margin-bottom:10px;}
+.input-label{font-size:12px;color:var(--text2);margin-bottom:8px;}
+.date-row{display:flex;gap:8px;}
+.date-input{flex:1;background:var(--surface2);border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:10px 12px;color:var(--text);font-family:'Cairo',sans-serif;font-size:14px;text-align:center;}
+.date-sep{display:flex;align-items:center;color:var(--text3);font-size:13px;}
+.calc-btn{display:block;width:100%;padding:14px;background:var(--purple);border:none;border-radius:var(--radius);color:#fff;font-family:'Cairo',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.15s;margin-bottom:12px;}
+.calc-btn:active{transform:scale(0.97);opacity:0.9;}
+.leave-result{background:var(--surface);border-radius:var(--radius);border:0.5px solid var(--border);padding:16px;margin-bottom:10px;}
+.leave-result h4{font-size:14px;font-weight:600;color:var(--purple);margin-bottom:12px;}
+.result-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:13px;}
+.result-row:last-child{border-bottom:none;}
+.apply-leave-btn{display:block;width:100%;padding:14px;background:var(--red-dim);border:0.5px solid rgba(255,107,107,0.3);border-radius:var(--radius);color:var(--red);font-family:'Cairo',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.15s;}
+.apply-leave-btn:active{transform:scale(0.97);}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:flex-end;z-index:100;backdrop-filter:blur(4px);}
+.modal{background:var(--surface);border-radius:var(--radius) var(--radius) 0 0;padding:20px 16px 36px;width:100%;max-width:480px;margin:0 auto;border-top:0.5px solid var(--border2);max-height:80dvh;overflow-y:auto;animation:slideUp 0.25s ease;}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 16px;}
+.modal h3{font-size:16px;font-weight:600;margin-bottom:14px;}
+.shift-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:14px;margin-bottom:8px;border:0.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;background:var(--bg);color:var(--text);font-family:'Cairo',sans-serif;font-size:14px;font-weight:500;transition:all 0.15s;text-align:right;}
+.shift-btn:active{transform:scale(0.98);}
+.shift-btn.active{border-color:var(--blue);background:var(--blue-dim);color:var(--blue);}
+.shift-bonus{font-size:13px;font-weight:700;color:var(--green);}
+.shift-btn.active .shift-bonus{color:var(--blue);}
+.cancel-btn{display:block;width:100%;text-align:center;padding:14px;border:none;background:var(--surface2);color:var(--text2);font-family:'Cairo',sans-serif;font-size:14px;cursor:pointer;margin-top:4px;border-radius:var(--radius-sm);}
+.detail-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:0.5px solid var(--border);}
+.detail-row:last-child{border-bottom:none;}
+.detail-date{font-size:14px;font-weight:600;}
+.detail-type{font-size:12px;color:var(--text2);margin-top:2px;}
+.detail-bonus{font-size:15px;font-weight:700;color:var(--blue);}
+.detail-total{display:flex;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:0.5px solid var(--border2);}
+.detail-total span{font-size:14px;font-weight:600;}
+.total-val{color:var(--blue);font-size:18px;}
+.empty-msg{text-align:center;padding:28px;font-size:14px;color:var(--text2);}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- PAGE 1: CALENDAR -->
+<div class="page active" id="page-calendar">
+  <div class="header">
+    <div class="header-top">
+      <div><h1>شيفتات حمزة</h1><p>تتبع مكسبك الزيادة</p></div>
+      <div class="salary-badge">7,000ج</div>
+    </div>
+  </div>
+  <div class="month-nav">
+    <button class="nav-btn" onclick="changeMonth(-1)">&#9664;</button>
+    <span class="month-title" id="month-label"></span>
+    <button class="nav-btn" onclick="changeMonth(1)">&#9654;</button>
+  </div>
+  <div class="weekdays"><span>أحد</span><span>اثن</span><span>ثلا</span><span>أرب</span><span>خمي</span><span>جمع</span><span>سبت</span></div>
+  <div class="calendar-grid" id="cal-grid"></div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#4A9EFF"></div>بليل عادي</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#4CAF7D"></div>صبح+بليل عادي</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#F5A623"></div>بليل إجازة</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#FF6B6B"></div>صبح+بليل إجازة</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#B57BFF"></div>إجازة امتحانات</div>
+  </div>
+  <div class="summary"><div class="summary-grid" id="summary-grid"></div></div>
+</div>
+
+<!-- PAGE 2: HISTORY -->
+<div class="page" id="page-history">
+  <div class="history-header">
+    <h1>السجل الشهري</h1>
+    <p>كل شهر بتفاصيله</p>
+  </div>
+  <div id="history-list"></div>
+</div>
+
+<!-- PAGE 3: LEAVE -->
+<div class="page" id="page-leave">
+  <div class="leave-page-header">
+    <h1>إجازة الامتحانات</h1>
+    <p>احسب الخصم بتاع إجازتك</p>
+  </div>
+  <div class="leave-form">
+    <div class="input-group">
+      <div class="input-label">اختار فترة الإجازة</div>
+      <div class="date-row">
+        <input type="date" class="date-input" id="leave-from" oninput="calcLeave()">
+        <div class="date-sep">لـ</div>
+        <input type="date" class="date-input" id="leave-to" oninput="calcLeave()">
+      </div>
+    </div>
+    <div id="leave-result-box" style="display:none"></div>
+    <button class="apply-leave-btn" id="apply-leave-btn" style="display:none" onclick="applyLeave()">تسجيل الإجازة في التقويم</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <div class="nav-item active" id="nav-calendar" onclick="showPage('calendar')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span>التقويم</span>
+  </div>
+  <div class="nav-item" id="nav-history" onclick="showPage('history')">
+    <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10"/><polyline points="12 6 12 12 16 14"/><path d="M22 2 12 12"/></svg>
+    <span>السجل</span>
+  </div>
+  <div class="nav-item" id="nav-leave" onclick="showPage('leave')">
+    <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <span>الإجازات</span>
+  </div>
+</div>
+
+</div>
+<div id="modal-root"></div>
+
+<script>
+const BASE=7000, DAILY=233.33, HOURLY=7000/(30*9), OFF_FULL_BONUS=Math.round((DAILY+4*HOURLY*1.5)*100)/100;
+const SHIFTS=[
+  {id:'none',label:'لا شيء / إجازة طبيعية',bonus:0},
+  {id:'night',label:'شيفت بليل (عادي)',bonus:0},
+  {id:'full',label:'صبح + بليل (عادي)',bonus:DAILY},
+  {id:'off-night',label:'شيفت بليل (يوم إجازة أحد)',bonus:DAILY},
+  {id:'off-full',label:'صبح + بليل (يوم إجازة أحد)',bonus:OFF_FULL_BONUS},
+];
+const DOT_CLASS={none:'',night:'dot-night',full:'dot-full','off-night':'dot-off-night','off-full':'dot-off-full',leave:'dot-leave'};
+const DOT_LABEL={night:'بليل',full:'صبح+بليل','off-night':'بليل إج','off-full':'صبح+بليل إج',leave:'إجازة'};
+const MONTHS_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const DAYS_AR=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+const START=new Date(2026,4,1);
+
+let data={};
+try{data=JSON.parse(localStorage.getItem('hamza_shifts')||'{}');}catch(e){}
+let yr=2026,mo=4,selDay=null;
+
+function save(){try{localStorage.setItem('hamza_shifts',JSON.stringify(data));}catch(e){}}
+function key(y,m,d){return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}
+function isSun(y,m,d){return new Date(y,m,d).getDay()===0;}
+function beforeStart(y,m,d){return new Date(y,m,d)<START;}
+function getBonus(id){return (SHIFTS.find(x=>x.id===id)||{bonus:0}).bonus;}
+function getLabel(id){return (SHIFTS.find(x=>x.id===id)||{label:''}).label;}
+
+// PAGE SWITCHING
+function showPage(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.getElementById('nav-'+p).classList.add('active');
+  if(p==='history') renderHistory();
+}
+
+// CALENDAR
+function render(){
+  document.getElementById('month-label').textContent=MONTHS_AR[mo]+' '+yr;
+  const grid=document.getElementById('cal-grid');
+  grid.innerHTML='';
+  const first=new Date(yr,mo,1).getDay();
+  const days=new Date(yr,mo+1,0).getDate();
+  const today=new Date();
+  for(let i=0;i<first;i++){const e=document.createElement('div');e.className='day-cell empty';grid.appendChild(e);}
+  for(let d=1;d<=days;d++){
+    const cell=document.createElement('div');
+    const k=key(yr,mo,d);
+    const shift=data[k]||'none';
+    const sun=isSun(yr,mo,d);
+    const before=beforeStart(yr,mo,d);
+    const isToday=today.getDate()===d&&today.getMonth()===mo&&today.getFullYear()===yr;
+    cell.className='day-cell'+(sun?' sunday':'')+(isToday?' today':'');
+    const num=document.createElement('div');
+    num.className='day-num'+(before?' muted':'');
+    num.textContent=d;
+    cell.appendChild(num);
+    if(shift!=='none'){
+      const dot=document.createElement('div');
+      dot.className='shift-dot '+(DOT_CLASS[shift]||'');
+      dot.textContent=DOT_LABEL[shift]||shift;
+      cell.appendChild(dot);
+    }
+    if(!before) cell.onclick=()=>openShift(d);
+    grid.appendChild(cell);
+  }
+  renderSummary();
+}
+
+function renderSummary(){
+  const prefix=`${yr}-${String(mo+1).padStart(2,'0')}-`;
+  let bonus=0,count=0,leaveDays=0,leaveDeduct=0;
+  Object.keys(data).forEach(k=>{
+    if(!k.startsWith(prefix)) return;
+    const v=data[k];
+    if(v==='leave'){leaveDays++;leaveDeduct+=DAILY;}
+    else if(v!=='none'){count++;bonus+=getBonus(v);}
+  });
+  const total=BASE+bonus-leaveDeduct;
+  document.getElementById('summary-grid').innerHTML=`
+    <div class="s-card"><div class="s-label">المرتب الأساسي</div><div class="s-val">7,000ج</div></div>
+    <div class="s-card"><div class="s-label">شيفتات مسجلة</div><div class="s-val">${count}</div></div>
+    <div class="s-card clickable" onclick="openDetail()"><div class="s-label">إجمالي الزيادة</div><div class="s-val blue">+${bonus.toFixed(0)}ج</div><div class="s-tap">اضغط للتفاصيل</div></div>
+    <div class="s-card"><div class="s-label">أيام إجازة مخصومة</div><div class="s-val ${leaveDays>0?'red':''}">-${leaveDeduct.toFixed(0)}ج</div></div>
+    <div class="s-card full"><div class="s-label">إجمالي الشهر</div><div class="s-val ${total>=BASE?'green':'red'}">${total.toFixed(0)}ج</div></div>
+  `;
+}
+
+// SHIFT MODAL
+function openShift(day){
+  selDay=day;
+  const k=key(yr,mo,day);
+  const cur=data[k]||'none';
+  const sun=isSun(yr,mo,day);
+  const avail=sun?SHIFTS:SHIFTS.filter(s=>s.id!=='off-night'&&s.id!=='off-full');
+  document.getElementById('modal-root').innerHTML=`
+    <div class="overlay" onclick="closeModal(event)">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <h3>${day} ${MONTHS_AR[mo]} — ${sun?'يوم إجازة (أحد)':'يوم عادي'}</h3>
+        ${avail.map(s=>`<button class="shift-btn ${cur===s.id?'active':''}" onclick="setShift('${s.id}')">
+          <span>${s.label}</span>
+          ${s.bonus>0?`<span class="shift-bonus">+${s.bonus.toFixed(0)}ج</span>`:''}
+        </button>`).join('')}
+        <button class="cancel-btn" onclick="closeModal()">إلغاء</button>
+      </div>
+    </div>`;
+}
+
+function setShift(id){
+  data[key(yr,mo,selDay)]=id;
+  save();closeModal();render();
+}
+
+// DETAIL MODAL
+function openDetail(){
+  const prefix=`${yr}-${String(mo+1).padStart(2,'0')}-`;
+  const days=[];
+  Object.keys(data).filter(k=>k.startsWith(prefix)&&data[k]!=='none'&&data[k]!=='leave'&&getBonus(data[k])>0).sort().forEach(k=>{
+    const d=parseInt(k.split('-')[2]);
+    days.push({d,dayName:DAYS_AR[new Date(yr,mo,d).getDay()],shift:data[k],bonus:getBonus(data[k])});
+  });
+  const total=days.reduce((a,b)=>a+b.bonus,0);
+  const rows=days.length===0?`<div class="empty-msg">مفيش أيام فيها زيادة لحد دلوقتي</div>`
+    :days.map(x=>`<div class="detail-row"><div><div class="detail-date">${x.dayName} ${x.d} ${MONTHS_AR[mo]}</div><div class="detail-type">${getLabel(x.shift)}</div></div><div class="detail-bonus">+${x.bonus.toFixed(0)}ج</div></div>`).join('');
+  const tot=days.length>0?`<div class="detail-total"><span>الإجمالي</span><span class="total-val">+${total.toFixed(0)}ج</span></div>`:'';
+  document.getElementById('modal-root').innerHTML=`
+    <div class="overlay" onclick="closeModal(event)">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <h3>تفاصيل الزيادات — ${MONTHS_AR[mo]} ${yr}</h3>
+        ${rows}${tot}
+        <button class="cancel-btn" onclick="closeModal()">إغلاق</button>
+      </div>
+    </div>`;
+}
+
+function closeModal(e){if(!e||e.target.classList.contains('overlay'))document.getElementById('modal-root').innerHTML='';}
+function changeMonth(dir){mo+=dir;if(mo>11){mo=0;yr++;}if(mo<0){mo=11;yr--;}render();}
+
+// HISTORY
+function renderHistory(){
+  const months={};
+  Object.keys(data).forEach(k=>{
+    const [y,m]=k.split('-');
+    const mk=`${y}-${m}`;
+    if(!months[mk]) months[mk]={bonus:0,deduct:0,shifts:{night:0,full:0,'off-night':0,'off-full':0},leaveDays:0};
+    const v=data[k];
+    if(v==='leave'){months[mk].leaveDays++;months[mk].deduct+=DAILY;}
+    else if(v!=='none'){months[mk].shifts[v]=(months[mk].shifts[v]||0)+1;months[mk].bonus+=getBonus(v);}
+  });
+  const keys=Object.keys(months).sort().reverse();
+  const el=document.getElementById('history-list');
+  if(!keys.length){el.innerHTML='<div class="no-history">مفيش بيانات لحد دلوقتي</div>';return;}
+  el.innerHTML=keys.map(mk=>{
+    const [y,m]=mk.split('-');
+    const mo_idx=parseInt(m)-1;
+    const d=months[mk];
+    const total=BASE+d.bonus-d.deduct;
+    return `
+    <div class="month-card" onclick="toggleHistory('${mk}')">
+      <div class="month-card-header">
+        <span class="month-card-title">${MONTHS_AR[mo_idx]} ${y}</span>
+        <span class="month-card-total">${total.toFixed(0)}ج</span>
+      </div>
+      <div class="month-card-body" id="hist-${mk}">
+        <div class="stat-row"><span class="stat-label">المرتب الأساسي</span><span class="stat-val">7,000ج</span></div>
+        ${d.shifts.night>0?`<div class="stat-row"><span class="stat-label">شيفت بليل عادي</span><span class="stat-val blue">${d.shifts.night} يوم</span></div>`:''}
+        ${d.shifts.full>0?`<div class="stat-row"><span class="stat-label">صبح + بليل عادي</span><span class="stat-val green">${d.shifts.full} يوم (+${(d.shifts.full*DAILY).toFixed(0)}ج)</span></div>`:''}
+        ${(d.shifts['off-night']||0)>0?`<div class="stat-row"><span class="stat-label">بليل يوم إجازة</span><span class="stat-val" style="color:var(--amber)">${d.shifts['off-night']} يوم (+${(d.shifts['off-night']*DAILY).toFixed(0)}ج)</span></div>`:''}
+        ${(d.shifts['off-full']||0)>0?`<div class="stat-row"><span class="stat-label">صبح+بليل يوم إجازة</span><span class="stat-val red">${d.shifts['off-full']} يوم (+${(d.shifts['off-full']*OFF_FULL_BONUS).toFixed(0)}ج)</span></div>`:''}
+        <div class="stat-row"><span class="stat-label">إجمالي الزيادة</span><span class="stat-val blue">+${d.bonus.toFixed(0)}ج</span></div>
+        ${d.leaveDays>0?`<div class="stat-row"><span class="stat-label">أيام إجازة مخصومة</span><span class="stat-val red">-${d.deduct.toFixed(0)}ج (${d.leaveDays} يوم)</span></div>`:''}
+        <div class="stat-row"><span class="stat-label">إجمالي الشهر</span><span class="stat-val ${total>=BASE?'green':'red'}">${total.toFixed(0)}ج</span></div>
+        <button class="export-btn" onclick="exportMonth('${mk}',event)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          تصدير كـ TXT
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleHistory(mk){
+  const el=document.getElementById('hist-'+mk);
+  el.classList.toggle('open');
+}
+
+function exportMonth(mk,e){
+  e.stopPropagation();
+  const [y,m]=mk.split('-');
+  const mo_idx=parseInt(m)-1;
+  const prefix=`${y}-${m}-`;
+  let lines=[
+    `============================`,
+    `تقرير شهر ${MONTHS_AR[mo_idx]} ${y}`,
+    `حمزة — مرتب أساسي: 7,000ج`,
+    `============================`,
+    ``
+  ];
+  let bonus=0,deduct=0,leaveDays=0;
+  const dayEntries=Object.keys(data).filter(k=>k.startsWith(prefix)&&data[k]!=='none').sort();
+  dayEntries.forEach(k=>{
+    const d=parseInt(k.split('-')[2]);
+    const v=data[k];
+    const dt=new Date(parseInt(y),mo_idx,d);
+    if(v==='leave'){
+      lines.push(`${DAYS_AR[dt.getDay()]} ${d}/${parseInt(m)}/${y} — إجازة امتحانات (-${DAILY.toFixed(0)}ج)`);
+      deduct+=DAILY; leaveDays++;
+    } else {
+      const b=getBonus(v);
+      lines.push(`${DAYS_AR[dt.getDay()]} ${d}/${parseInt(m)}/${y} — ${getLabel(v)}${b>0?' (+'+b.toFixed(0)+'ج)':''}`);
+      bonus+=b;
+    }
+  });
+  const total=BASE+bonus-deduct;
+  lines.push(``);
+  lines.push(`============================`);
+  lines.push(`إجمالي الزيادة: +${bonus.toFixed(0)}ج`);
+  if(leaveDays>0) lines.push(`خصم الإجازات: -${deduct.toFixed(0)}ج (${leaveDays} يوم)`);
+  lines.push(`إجمالي الشهر: ${total.toFixed(0)}ج`);
+  lines.push(`============================`);
+  const blob=new Blob([lines.join('\n')],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`shifts_${y}_${m}.txt`;
+  a.click();
+}
+
+// LEAVE CALCULATOR
+function calcLeave(){
+  const from=document.getElementById('leave-from').value;
+  const to=document.getElementById('leave-to').value;
+  if(!from||!to) return;
+  const f=new Date(from), t=new Date(to);
+  if(f>t) return;
+  let totalDays=0,sundays=0,workedDays=0;
+  const cur=new Date(f);
+  const workedList=[];
+  const leaveList=[];
+  while(cur<=t){
+    const k=`${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,'0')}-${String(cur.getDate()).padStart(2,'0')}`;
+    const shift=data[k]||'none';
+    totalDays++;
+    if(cur.getDay()===0) sundays++;
+    else if(shift!=='none'&&shift!=='leave'){workedDays++;workedList.push(`${cur.getDate()}/${cur.getMonth()+1}`);}
+    else leaveList.push(k);
+    cur.setDate(cur.getDate()+1);
+  }
+  const deductDays=totalDays-sundays-workedDays;
+  const deductAmount=deductDays*DAILY;
+  const box=document.getElementById('leave-result-box');
+  box.style.display='block';
+  box.className='leave-result';
+  box.innerHTML=`
+    <h4>نتيجة الحساب</h4>
+    <div class="result-row"><span class="stat-label">إجمالي أيام الفترة</span><span class="stat-val">${totalDays} يوم</span></div>
+    <div class="result-row"><span class="stat-label">أيام الأحد (غير محسوبة)</span><span class="stat-val" style="color:var(--amber)">${sundays} يوم</span></div>
+    <div class="result-row"><span class="stat-label">أيام نزلت شغل</span><span class="stat-val green">${workedDays} يوم${workedDays>0?' ('+workedList.join('، ')+')':''}</span></div>
+    <div class="result-row"><span class="stat-label">أيام الخصم الفعلية</span><span class="stat-val red">${deductDays} يوم</span></div>
+    <div class="result-row"><span class="stat-label">المبلغ المخصوم</span><span class="stat-val red">-${deductAmount.toFixed(0)}ج</span></div>
+    <div class="result-row"><span class="stat-label">إجمالي الشهر المتوقع</span><span class="stat-val ${(BASE-deductAmount)>=BASE?'green':'red'}">${(BASE-deductAmount).toFixed(0)}ج</span></div>
+  `;
+  document.getElementById('apply-leave-btn').style.display='block';
+  document.getElementById('apply-leave-btn')._leaveList=leaveList;
+}
+
+function applyLeave(){
+  const btn=document.getElementById('apply-leave-btn');
+  const leaveList=btn._leaveList||[];
+  leaveList.forEach(k=>{data[k]='leave';});
+  save();
+  btn.style.display='none';
+  document.getElementById('leave-result-box').innerHTML+='<div style="color:var(--green);font-size:13px;margin-top:8px;font-weight:600;">✓ تم تسجيل الإجازة في التقويم</div>';
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
