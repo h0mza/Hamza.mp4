@@ -1,6 +1,6 @@
 {
-  "name": "Shifts",
-  "short_name": "شيفتاتي",
+  "name": "My Shifts",
+  "short_name": "My Shifts",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#0f0f0f",
