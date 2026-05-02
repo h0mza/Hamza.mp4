@@ -6,9 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0f0f0f">
-<title>شيفتات حمزة</title>
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon.png">
+<title>My Shifts</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap');
 :root {
@@ -25,45 +23,44 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;}
 .app{max-width:480px;margin:0 auto;}
-
-/* BOTTOM NAV */
-.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--surface);border-top:0.5px solid var(--border2);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom);}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 8px;cursor:pointer;gap:3px;transition:color 0.15s;}
-.nav-item span{font-size:11px;font-weight:500;color:var(--text3);}
-.nav-item svg{width:22px;height:22px;stroke:var(--text3);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:stroke 0.15s;}
-.nav-item.active span{color:var(--blue);}
-.nav-item.active svg{stroke:var(--blue);}
-
-/* PAGES */
 .page{display:none;padding-bottom:80px;}
 .page.active{display:block;}
 
-/* HEADER */
-.header{padding:52px 20px 16px;background:linear-gradient(180deg,#1a1a1a 0%,transparent 100%);}
-.header-top{display:flex;justify-content:space-between;align-items:flex-start;}
-.header h1{font-size:26px;font-weight:700;letter-spacing:-0.5px;}
-.header p{font-size:13px;color:var(--text2);margin-top:3px;}
-.salary-badge{background:var(--blue-dim);border:0.5px solid rgba(74,158,255,0.25);color:var(--blue);font-size:13px;font-weight:600;padding:6px 12px;border-radius:20px;white-space:nowrap;}
+/* TOP BAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:52px 20px 12px;background:linear-gradient(180deg,#1a1a1a 0%,transparent 100%);}
+.topbar h1{font-size:22px;font-weight:700;}
+.topbar p{font-size:12px;color:var(--text2);margin-top:2px;}
+.user-switcher{display:flex;align-items:center;gap:8px;background:var(--surface);border:0.5px solid var(--border2);border-radius:20px;padding:6px 12px;cursor:pointer;}
+.user-switcher span{font-size:13px;font-weight:600;color:var(--text);}
+.user-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--surface);border-top:0.5px solid var(--border2);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom);}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 8px;cursor:pointer;gap:3px;}
+.nav-item span{font-size:11px;font-weight:500;color:var(--text3);}
+.nav-item svg{width:22px;height:22px;stroke:var(--text3);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.nav-item.active span{color:var(--blue);}
+.nav-item.active svg{stroke:var(--blue);}
 
 /* MONTH NAV */
-.month-nav{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;}
-.nav-btn{background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius-sm);width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);font-size:16px;transition:background 0.15s;}
+.month-nav{display:flex;align-items:center;justify-content:space-between;padding:8px 20px 8px;}
+.nav-btn{background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius-sm);width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);font-size:16px;}
 .nav-btn:active{background:var(--surface2);}
 .month-title{font-size:18px;font-weight:600;}
 
-/* WEEKDAYS + CALENDAR */
-.weekdays{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;padding:0 12px 8px;}
-.weekdays span{font-size:12px;color:var(--text3);font-weight:500;}
-.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:0 12px 12px;}
-.day-cell{border-radius:var(--radius-sm);padding:6px 2px 5px;text-align:center;cursor:pointer;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;border:0.5px solid transparent;transition:all 0.15s;position:relative;}
+/* CALENDAR */
+.weekdays{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;padding:0 12px 6px;}
+.weekdays span{font-size:10px;color:var(--text3);font-weight:500;}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:0 12px 12px;}
+.day-cell{border-radius:var(--radius-sm);padding:5px 2px 4px;text-align:center;cursor:pointer;min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;border:0.5px solid transparent;transition:all 0.15s;}
 .day-cell:active{transform:scale(0.95);}
 .day-cell.empty{cursor:default;pointer-events:none;}
-.day-cell.sunday{background:rgba(245,166,35,0.06);}
+.day-cell.off-day{background:rgba(245,166,35,0.06);}
 .day-cell.today .day-num{background:var(--blue);color:#fff;border-radius:50%;}
-.day-cell.leave-selected{background:var(--purple-dim);border-color:rgba(181,123,255,0.3);}
-.day-num{font-size:13px;font-weight:600;color:var(--text);width:26px;height:26px;display:flex;align-items:center;justify-content:center;}
+.day-cell.leave-sel{background:var(--purple-dim);border-color:rgba(181,123,255,0.3);}
+.day-num{font-size:12px;font-weight:600;color:var(--text);width:24px;height:24px;display:flex;align-items:center;justify-content:center;}
 .day-num.muted{color:var(--text3);}
-.shift-dot{font-size:8px;padding:2px 4px;border-radius:6px;font-weight:600;line-height:1.3;max-width:100%;}
+.shift-dot{font-size:7px;padding:1px 3px;border-radius:5px;font-weight:600;line-height:1.4;max-width:100%;}
 .dot-night{background:var(--blue-dim);color:var(--blue);}
 .dot-full{background:var(--green-dim);color:var(--green);}
 .dot-off-night{background:var(--amber-dim);color:var(--amber);}
@@ -71,111 +68,127 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
 .dot-leave{background:var(--purple-dim);color:var(--purple);}
 
 /* LEGEND */
-.legend{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 12px;}
-.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);}
-.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 10px;}
+.legend-item{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text2);}
+.legend-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 
-/* SUMMARY CARDS */
+/* SUMMARY */
 .summary{margin:0 12px 12px;}
-.summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
-.s-card{background:var(--surface);border-radius:var(--radius);padding:14px 16px;border:0.5px solid var(--border);}
+.summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+.s-card{background:var(--surface);border-radius:var(--radius);padding:12px 14px;border:0.5px solid var(--border);}
 .s-card.clickable{cursor:pointer;transition:all 0.15s;}
 .s-card.clickable:active{background:var(--surface2);transform:scale(0.97);}
 .s-card.full{grid-column:1/-1;}
-.s-label{font-size:12px;color:var(--text2);}
-.s-val{font-size:20px;font-weight:700;margin-top:4px;}
+.s-label{font-size:11px;color:var(--text2);}
+.s-val{font-size:18px;font-weight:700;margin-top:3px;}
 .s-val.blue{color:var(--blue);}
 .s-val.red{color:var(--red);}
 .s-val.green{color:var(--green);}
-.s-tap{font-size:10px;color:var(--text3);margin-top:3px;}
+.s-tap{font-size:10px;color:var(--text3);margin-top:2px;}
 
 /* SECTION TITLE */
-.section-title{font-size:13px;font-weight:600;color:var(--text2);padding:0 20px 8px;text-transform:uppercase;letter-spacing:0.5px;}
+.sec-title{font-size:12px;font-weight:600;color:var(--text2);padding:4px 20px 8px;letter-spacing:0.5px;}
 
-/* LEAVE MODE BANNER */
-.leave-banner{margin:0 12px 12px;background:var(--purple-dim);border:0.5px solid rgba(181,123,255,0.3);border-radius:var(--radius);padding:12px 16px;}
-.leave-banner h4{font-size:14px;font-weight:600;color:var(--purple);margin-bottom:4px;}
-.leave-banner p{font-size:12px;color:var(--text2);line-height:1.6;}
-.leave-actions{display:flex;gap:8px;margin-top:10px;}
-.leave-btn{flex:1;padding:10px;border-radius:var(--radius-sm);border:none;font-family:'Cairo',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;}
-.leave-btn:active{transform:scale(0.97);}
-.leave-btn.confirm{background:var(--purple);color:#fff;}
-.leave-btn.cancel{background:var(--surface2);color:var(--text2);}
-
-/* HISTORY PAGE */
-.history-header{padding:52px 20px 16px;background:linear-gradient(180deg,#1a1a1a 0%,transparent 100%);}
-.history-header h1{font-size:26px;font-weight:700;}
-.history-header p{font-size:13px;color:var(--text2);margin-top:3px;}
-.month-card{margin:0 12px 10px;background:var(--surface);border-radius:var(--radius);border:0.5px solid var(--border);overflow:hidden;cursor:pointer;transition:all 0.15s;}
-.month-card:active{background:var(--surface2);}
-.month-card-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;}
+/* HISTORY */
+.month-card{margin:0 12px 10px;background:var(--surface);border-radius:var(--radius);border:0.5px solid var(--border);overflow:hidden;}
+.month-card-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;}
 .month-card-title{font-size:15px;font-weight:600;}
+.month-card-right{display:flex;align-items:center;gap:8px;}
 .month-card-total{font-size:15px;font-weight:700;color:var(--blue);}
+.lock-badge{font-size:11px;padding:3px 8px;border-radius:10px;font-weight:600;}
+.lock-badge.locked{background:var(--red-dim);color:var(--red);}
+.lock-badge.open{background:var(--green-dim);color:var(--green);}
 .month-card-body{padding:0 16px 14px;display:none;border-top:0.5px solid var(--border);}
 .month-card-body.open{display:block;}
-.stat-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:13px;}
+.stat-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid var(--border);font-size:13px;}
 .stat-row:last-child{border-bottom:none;}
 .stat-label{color:var(--text2);}
 .stat-val{font-weight:600;}
 .stat-val.blue{color:var(--blue);}
 .stat-val.red{color:var(--red);}
 .stat-val.green{color:var(--green);}
+.stat-val.amber{color:var(--amber);}
 .stat-val.purple{color:var(--purple);}
-.export-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:12px;padding:11px;background:var(--surface2);border:0.5px solid var(--border2);border-radius:var(--radius-sm);cursor:pointer;font-family:'Cairo',sans-serif;font-size:13px;font-weight:600;color:var(--text2);transition:all 0.15s;}
-.export-btn:active{transform:scale(0.97);}
+.action-row{display:flex;gap:8px;margin-top:10px;}
+.act-btn{flex:1;padding:10px;border-radius:var(--radius-sm);border:none;font-family:'Cairo',sans-serif;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;}
+.act-btn.export{background:var(--surface2);color:var(--text2);border:0.5px solid var(--border2);}
+.act-btn.lock-btn{background:var(--red-dim);color:var(--red);border:0.5px solid rgba(255,107,107,0.3);}
+.act-btn.unlock-btn{background:var(--green-dim);color:var(--green);border:0.5px solid rgba(76,175,125,0.3);}
 .no-history{text-align:center;padding:40px 20px;color:var(--text3);font-size:14px;}
 
 /* LEAVE PAGE */
-.leave-page-header{padding:52px 20px 16px;background:linear-gradient(180deg,#1a1a1a 0%,transparent 100%);}
-.leave-page-header h1{font-size:26px;font-weight:700;}
-.leave-page-header p{font-size:13px;color:var(--text2);margin-top:3px;}
-.leave-form{margin:0 12px 12px;}
-.input-group{background:var(--surface);border-radius:var(--radius);border:0.5px solid var(--border);padding:14px 16px;margin-bottom:10px;}
-.input-label{font-size:12px;color:var(--text2);margin-bottom:8px;}
-.date-row{display:flex;gap:8px;}
-.date-input{flex:1;background:var(--surface2);border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:10px 12px;color:var(--text);font-family:'Cairo',sans-serif;font-size:14px;text-align:center;}
-.date-sep{display:flex;align-items:center;color:var(--text3);font-size:13px;}
-.calc-btn{display:block;width:100%;padding:14px;background:var(--purple);border:none;border-radius:var(--radius);color:#fff;font-family:'Cairo',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.15s;margin-bottom:12px;}
-.calc-btn:active{transform:scale(0.97);opacity:0.9;}
-.leave-result{background:var(--surface);border-radius:var(--radius);border:0.5px solid var(--border);padding:16px;margin-bottom:10px;}
-.leave-result h4{font-size:14px;font-weight:600;color:var(--purple);margin-bottom:12px;}
-.result-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:13px;}
-.result-row:last-child{border-bottom:none;}
-.apply-leave-btn{display:block;width:100%;padding:14px;background:var(--red-dim);border:0.5px solid rgba(255,107,107,0.3);border-radius:var(--radius);color:var(--red);font-family:'Cairo',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.15s;}
-.apply-leave-btn:active{transform:scale(0.97);}
+.leave-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:0 12px 12px;}
+.leave-day{border-radius:var(--radius-sm);padding:5px 2px;text-align:center;cursor:pointer;min-height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:0.5px solid transparent;transition:all 0.15s;}
+.leave-day.empty{cursor:default;pointer-events:none;}
+.leave-day.selected{background:var(--purple-dim);border-color:rgba(181,123,255,0.4);}
+.leave-day.has-shift{background:var(--green-dim);border-color:rgba(76,175,125,0.3);cursor:not-allowed;}
+.leave-day.off-day-l{background:rgba(245,166,35,0.06);}
+.leave-day-num{font-size:12px;font-weight:600;color:var(--text);}
+.leave-day-num.muted{color:var(--text3);}
+.leave-result{margin:0 12px 10px;background:var(--surface);border-radius:var(--radius);border:0.5px solid var(--border);padding:14px;}
+.leave-result h4{font-size:14px;font-weight:600;color:var(--purple);margin-bottom:10px;}
+.reason-input{width:100%;background:var(--surface2);border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:10px 12px;color:var(--text);font-family:'Cairo',sans-serif;font-size:14px;margin-bottom:10px;resize:none;}
+.apply-btn{display:block;width:100%;padding:13px;background:var(--purple);border:none;border-radius:var(--radius);color:#fff;font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
+.apply-btn:active{opacity:0.9;}
+
+/* USERS PAGE */
+.users-list{padding:0 12px;}
+.user-card{background:var(--surface);border-radius:var(--radius);border:0.5px solid var(--border);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all 0.15s;}
+.user-card:active{background:var(--surface2);}
+.user-card.active-user{border-color:var(--blue);}
+.user-card-left{display:flex;align-items:center;gap:12px;}
+.user-card-info h4{font-size:14px;font-weight:600;}
+.user-card-info p{font-size:12px;color:var(--text2);margin-top:2px;}
+.user-card-right{display:flex;align-items:center;gap:8px;}
+.edit-btn-sm{background:var(--surface2);border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:6px 10px;font-size:12px;color:var(--text2);cursor:pointer;font-family:'Cairo',sans-serif;}
+.add-user-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;background:var(--blue-dim);border:0.5px solid rgba(74,158,255,0.3);border-radius:var(--radius);color:var(--blue);font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin:0 12px;width:calc(100% - 24px);}
 
 /* MODAL */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:flex-end;z-index:100;backdrop-filter:blur(4px);}
-.modal{background:var(--surface);border-radius:var(--radius) var(--radius) 0 0;padding:20px 16px 36px;width:100%;max-width:480px;margin:0 auto;border-top:0.5px solid var(--border2);max-height:80dvh;overflow-y:auto;animation:slideUp 0.25s ease;}
+.modal{background:var(--surface);border-radius:var(--radius) var(--radius) 0 0;padding:20px 16px 36px;width:100%;max-width:480px;margin:0 auto;border-top:0.5px solid var(--border2);max-height:85dvh;overflow-y:auto;animation:slideUp 0.25s ease;}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .modal-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 16px;}
 .modal h3{font-size:16px;font-weight:600;margin-bottom:14px;}
-.shift-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:14px;margin-bottom:8px;border:0.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;background:var(--bg);color:var(--text);font-family:'Cairo',sans-serif;font-size:14px;font-weight:500;transition:all 0.15s;text-align:right;}
-.shift-btn:active{transform:scale(0.98);}
+.shift-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:13px;margin-bottom:7px;border:0.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;background:var(--bg);color:var(--text);font-family:'Cairo',sans-serif;font-size:14px;font-weight:500;transition:all 0.15s;text-align:right;}
 .shift-btn.active{border-color:var(--blue);background:var(--blue-dim);color:var(--blue);}
 .shift-bonus{font-size:13px;font-weight:700;color:var(--green);}
 .shift-btn.active .shift-bonus{color:var(--blue);}
-.cancel-btn{display:block;width:100%;text-align:center;padding:14px;border:none;background:var(--surface2);color:var(--text2);font-family:'Cairo',sans-serif;font-size:14px;cursor:pointer;margin-top:4px;border-radius:var(--radius-sm);}
-.detail-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:0.5px solid var(--border);}
+.cancel-btn{display:block;width:100%;text-align:center;padding:13px;border:none;background:var(--surface2);color:var(--text2);font-family:'Cairo',sans-serif;font-size:14px;cursor:pointer;margin-top:6px;border-radius:var(--radius-sm);}
+.detail-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:0.5px solid var(--border);}
 .detail-row:last-child{border-bottom:none;}
 .detail-date{font-size:14px;font-weight:600;}
 .detail-type{font-size:12px;color:var(--text2);margin-top:2px;}
-.detail-bonus{font-size:15px;font-weight:700;color:var(--blue);}
+.detail-bonus{font-size:14px;font-weight:700;color:var(--blue);}
 .detail-total{display:flex;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:0.5px solid var(--border2);}
 .detail-total span{font-size:14px;font-weight:600;}
-.total-val{color:var(--blue);font-size:18px;}
-.empty-msg{text-align:center;padding:28px;font-size:14px;color:var(--text2);}
+.total-val{color:var(--blue);font-size:17px;}
+.empty-msg{text-align:center;padding:24px;font-size:14px;color:var(--text2);}
+
+/* FORM */
+.form-group{margin-bottom:12px;}
+.form-label{font-size:12px;color:var(--text2);margin-bottom:6px;display:block;}
+.form-input{width:100%;background:var(--surface2);border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:11px 13px;color:var(--text);font-family:'Cairo',sans-serif;font-size:14px;}
+.form-input:focus{outline:none;border-color:var(--blue);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.form-select{width:100%;background:var(--surface2);border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:11px 13px;color:var(--text);font-family:'Cairo',sans-serif;font-size:14px;}
+.preview-card{background:var(--blue-dim);border:0.5px solid rgba(74,158,255,0.25);border-radius:var(--radius-sm);padding:12px;margin-bottom:12px;}
+.preview-card p{font-size:13px;color:var(--blue);line-height:1.8;}
+.submit-btn{display:block;width:100%;padding:14px;background:var(--blue);border:none;border-radius:var(--radius);color:#fff;font-family:'Cairo',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px;}
+.submit-btn:active{opacity:0.9;}
+.delete-btn{display:block;width:100%;padding:12px;background:var(--red-dim);border:0.5px solid rgba(255,107,107,0.3);border-radius:var(--radius);color:var(--red);font-family:'Cairo',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;text-align:center;}
 </style>
 </head>
 <body>
 <div class="app">
 
-<!-- PAGE 1: CALENDAR -->
+<!-- PAGE: CALENDAR -->
 <div class="page active" id="page-calendar">
-  <div class="header">
-    <div class="header-top">
-      <div><h1>شيفتات حمزة</h1><p>تتبع مكسبك الزيادة</p></div>
-      <div class="salary-badge">7,000ج</div>
+  <div class="topbar">
+    <div><h1>My Shifts</h1><p id="cal-user-name">...</p></div>
+    <div class="user-switcher" onclick="openUserSwitch()">
+      <div class="user-avatar" id="cal-avatar" style="background:#4A9EFF">ح</div>
+      <span id="cal-user-short">حمزة</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
   </div>
   <div class="month-nav">
@@ -186,42 +199,56 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
   <div class="weekdays"><span>أحد</span><span>اثن</span><span>ثلا</span><span>أرب</span><span>خمي</span><span>جمع</span><span>سبت</span></div>
   <div class="calendar-grid" id="cal-grid"></div>
   <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:#4A9EFF"></div>بليل عادي</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#4CAF7D"></div>صبح+بليل عادي</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#F5A623"></div>بليل إجازة</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#FF6B6B"></div>صبح+بليل إجازة</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#B57BFF"></div>إجازة امتحانات</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#4A9EFF"></div>بليل</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#4CAF7D"></div>صبح+بليل</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#F5A623"></div>بليل إج</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#FF6B6B"></div>صبح+بليل إج</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#B57BFF"></div>إجازة</div>
   </div>
   <div class="summary"><div class="summary-grid" id="summary-grid"></div></div>
 </div>
 
-<!-- PAGE 2: HISTORY -->
+<!-- PAGE: HISTORY -->
 <div class="page" id="page-history">
-  <div class="history-header">
-    <h1>السجل الشهري</h1>
-    <p>كل شهر بتفاصيله</p>
+  <div class="topbar">
+    <div><h1>السجل</h1><p id="hist-user-name">...</p></div>
+    <div class="user-switcher" onclick="openUserSwitch()">
+      <div class="user-avatar" id="hist-avatar" style="background:#4A9EFF">ح</div>
+      <span id="hist-user-short">حمزة</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
   </div>
   <div id="history-list"></div>
 </div>
 
-<!-- PAGE 3: LEAVE -->
+<!-- PAGE: LEAVE -->
 <div class="page" id="page-leave">
-  <div class="leave-page-header">
-    <h1>إجازة الامتحانات</h1>
-    <p>احسب الخصم بتاع إجازتك</p>
-  </div>
-  <div class="leave-form">
-    <div class="input-group">
-      <div class="input-label">اختار فترة الإجازة</div>
-      <div class="date-row">
-        <input type="date" class="date-input" id="leave-from" oninput="calcLeave()">
-        <div class="date-sep">لـ</div>
-        <input type="date" class="date-input" id="leave-to" oninput="calcLeave()">
-      </div>
+  <div class="topbar">
+    <div><h1>الإجازات</h1><p id="leave-user-name">...</p></div>
+    <div class="user-switcher" onclick="openUserSwitch()">
+      <div class="user-avatar" id="leave-avatar" style="background:#4A9EFF">ح</div>
+      <span id="leave-user-short">حمزة</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
-    <div id="leave-result-box" style="display:none"></div>
-    <button class="apply-leave-btn" id="apply-leave-btn" style="display:none" onclick="applyLeave()">تسجيل الإجازة في التقويم</button>
   </div>
+  <div class="month-nav">
+    <button class="nav-btn" onclick="changeLeaveMonth(-1)">&#9664;</button>
+    <span class="month-title" id="leave-month-label"></span>
+    <button class="nav-btn" onclick="changeLeaveMonth(1)">&#9654;</button>
+  </div>
+  <div class="weekdays"><span>أحد</span><span>اثن</span><span>ثلا</span><span>أرب</span><span>خمي</span><span>جمع</span><span>سبت</span></div>
+  <div class="leave-cal-grid" id="leave-grid"></div>
+  <div id="leave-result-box"></div>
+</div>
+
+<!-- PAGE: USERS -->
+<div class="page" id="page-users">
+  <div class="topbar"><div><h1>المستخدمون</h1><p>إدارة الفريق</p></div></div>
+  <div class="users-list" id="users-list"></div>
+  <button class="add-user-btn" onclick="openAddUser()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    إضافة مستخدم جديد
+  </button>
 </div>
 
 <!-- BOTTOM NAV -->
@@ -231,43 +258,92 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
     <span>التقويم</span>
   </div>
   <div class="nav-item" id="nav-history" onclick="showPage('history')">
-    <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10"/><polyline points="12 6 12 12 16 14"/><path d="M22 2 12 12"/></svg>
+    <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10"/><polyline points="12 6 12 12 16 14"/></svg>
     <span>السجل</span>
   </div>
   <div class="nav-item" id="nav-leave" onclick="showPage('leave')">
     <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
     <span>الإجازات</span>
   </div>
+  <div class="nav-item" id="nav-users" onclick="showPage('users')">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <span>المستخدمون</span>
+  </div>
 </div>
-
 </div>
 <div id="modal-root"></div>
 
 <script>
-const BASE=7000, DAILY=233.33, HOURLY=7000/(30*9), OFF_FULL_BONUS=Math.round((DAILY+4*HOURLY*1.5)*100)/100;
-const SHIFTS=[
-  {id:'none',label:'لا شيء / إجازة طبيعية',bonus:0},
-  {id:'night',label:'شيفت بليل (عادي)',bonus:0},
-  {id:'full',label:'صبح + بليل (عادي)',bonus:DAILY},
-  {id:'off-night',label:'شيفت بليل (يوم إجازة أحد)',bonus:DAILY},
-  {id:'off-full',label:'صبح + بليل (يوم إجازة أحد)',bonus:OFF_FULL_BONUS},
-];
-const DOT_CLASS={none:'',night:'dot-night',full:'dot-full','off-night':'dot-off-night','off-full':'dot-off-full',leave:'dot-leave'};
-const DOT_LABEL={night:'بليل',full:'صبح+بليل','off-night':'بليل إج','off-full':'صبح+بليل إج',leave:'إجازة'};
 const MONTHS_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const DAYS_AR=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+const DAYS_SHORT=['أحد','اثن','ثلا','أرب','خمي','جمع','سبت'];
+const COLORS=['#4A9EFF','#4CAF7D','#F5A623','#FF6B6B','#B57BFF','#FF9F43','#26de81'];
 const START=new Date(2026,4,1);
 
-let data={};
-try{data=JSON.parse(localStorage.getItem('hamza_shifts')||'{}');}catch(e){}
-let yr=2026,mo=4,selDay=null;
+// STORAGE
+function loadData(){try{return JSON.parse(localStorage.getItem('myshifts_v2')||'null');}catch(e){return null;}}
+function saveData(){localStorage.setItem('myshifts_v2',JSON.stringify(DB));}
 
-function save(){try{localStorage.setItem('hamza_shifts',JSON.stringify(data));}catch(e){}}
-function key(y,m,d){return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}
-function isSun(y,m,d){return new Date(y,m,d).getDay()===0;}
+// DEFAULT USER: HAMZA
+const DEFAULT_USERS=[{
+  id:'hamza', name:'حمزة', salary:7000, offDay:0,
+  wdStart:14, wdEnd:23, weStart:15, weEnd:24,
+  color:'#4A9EFF'
+}];
+
+let DB=loadData()||{users:DEFAULT_USERS,shifts:{},locks:{}};
+if(!DB.users||!DB.users.length) DB.users=DEFAULT_USERS;
+if(!DB.shifts) DB.shifts={};
+if(!DB.locks) DB.locks={};
+
+let currentUser=DB.users[0].id;
+let yr=2026,mo=4;
+let leaveYr=2026,leaveMo=4;
+let leaveSelected=new Set();
+let selDay=null;
+
+// HELPERS
+function getUser(id){return DB.users.find(u=>u.id===id)||DB.users[0];}
+function curUser(){return getUser(currentUser);}
+function key(uid,y,m,d){return `${uid}|${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}
+function monthKey(uid,y,m){return `${uid}|${y}-${String(m+1).padStart(2,'0')}`;}
+function isLocked(uid,y,m){return !!DB.locks[monthKey(uid,y,m)];}
+function isSun(y,m,d,offDay){return new Date(y,m,d).getDay()===offDay;}
 function beforeStart(y,m,d){return new Date(y,m,d)<START;}
-function getBonus(id){return (SHIFTS.find(x=>x.id===id)||{bonus:0}).bonus;}
-function getLabel(id){return (SHIFTS.find(x=>x.id===id)||{label:''}).label;}
+
+function userCalc(u){
+  const daily=u.salary/30;
+  const wdHours=u.wdEnd-u.wdStart;
+  const hourly=u.salary/(30*wdHours);
+  const fullBonus=daily;
+  const offNightBonus=daily;
+  const offFullBonus=daily+(4*hourly*1.5);
+  return {daily,hourly,wdHours,fullBonus,offNightBonus,offFullBonus};
+}
+
+function getShifts(uid,y,m){
+  const prefix=`${uid}|${y}-${String(m+1).padStart(2,'0')}-`;
+  const result={};
+  Object.keys(DB.shifts).forEach(k=>{if(k.startsWith(prefix)) result[k]=DB.shifts[k];});
+  return result;
+}
+
+function getBonus(u,shiftId){
+  const c=userCalc(u);
+  if(shiftId==='full') return c.fullBonus;
+  if(shiftId==='off-night') return c.offNightBonus;
+  if(shiftId==='off-full') return c.offFullBonus;
+  if(shiftId==='leave') return -c.daily;
+  return 0;
+}
+
+function getLabel(shiftId){
+  const map={none:'لا شيء',night:'شيفت بليل (عادي)',full:'صبح + بليل (عادي)','off-night':'شيفت بليل (إجازة)','off-full':'صبح + بليل (إجازة)',leave:'إجازة'};
+  return map[shiftId]||shiftId;
+}
+
+function avatarLetter(name){return name.charAt(0);}
+function colorForUser(u){return u.color||COLORS[0];}
 
 // PAGE SWITCHING
 function showPage(p){
@@ -275,74 +351,140 @@ function showPage(p){
   document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
   document.getElementById('nav-'+p).classList.add('active');
+  updateTopbars();
   if(p==='history') renderHistory();
+  if(p==='leave') renderLeaveCalendar();
+  if(p==='users') renderUsers();
+  if(p==='calendar') render();
 }
 
-// CALENDAR
+function updateTopbars(){
+  const u=curUser();
+  const c=userCalc(u);
+  ['cal','hist','leave'].forEach(p=>{
+    const nm=document.getElementById(p+'-user-name');
+    const av=document.getElementById(p+'-avatar');
+    const sh=document.getElementById(p+'-user-short');
+    if(nm) nm.textContent=`${u.salary.toLocaleString()}ج — اليوم ${c.daily.toFixed(0)}ج`;
+    if(av){av.textContent=avatarLetter(u.name);av.style.background=colorForUser(u);}
+    if(sh) sh.textContent=u.name;
+  });
+}
+
+// USER SWITCHER
+function openUserSwitch(){
+  const items=DB.users.map(u=>`
+    <div class="user-card ${u.id===currentUser?'active-user':''}" onclick="switchUser('${u.id}')">
+      <div class="user-card-left">
+        <div class="user-avatar" style="background:${colorForUser(u)};width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff">${avatarLetter(u.name)}</div>
+        <div class="user-card-info"><h4>${u.name}</h4><p>${u.salary.toLocaleString()}ج/شهر</p></div>
+      </div>
+      ${u.id===currentUser?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A9EFF" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>':''}
+    </div>`).join('');
+  document.getElementById('modal-root').innerHTML=`
+    <div class="overlay" onclick="closeModal(event)">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <h3>اختار مستخدم</h3>
+        ${items}
+        <button class="cancel-btn" onclick="closeModal()">إلغاء</button>
+      </div>
+    </div>`;
+}
+
+function switchUser(id){
+  currentUser=id;
+  closeModal();
+  updateTopbars();
+  render();
+  leaveSelected=new Set();
+  renderLeaveCalendar();
+}
+
+// CALENDAR RENDER
 function render(){
+  updateTopbars();
   document.getElementById('month-label').textContent=MONTHS_AR[mo]+' '+yr;
+  const u=curUser();
   const grid=document.getElementById('cal-grid');
   grid.innerHTML='';
   const first=new Date(yr,mo,1).getDay();
   const days=new Date(yr,mo+1,0).getDate();
   const today=new Date();
+  const locked=isLocked(u.id,yr,mo);
   for(let i=0;i<first;i++){const e=document.createElement('div');e.className='day-cell empty';grid.appendChild(e);}
   for(let d=1;d<=days;d++){
     const cell=document.createElement('div');
-    const k=key(yr,mo,d);
-    const shift=data[k]||'none';
-    const sun=isSun(yr,mo,d);
+    const k=key(u.id,yr,mo,d);
+    const shift=DB.shifts[k]||'none';
+    const offDay=isSun(yr,mo,d,u.offDay);
     const before=beforeStart(yr,mo,d);
     const isToday=today.getDate()===d&&today.getMonth()===mo&&today.getFullYear()===yr;
-    cell.className='day-cell'+(sun?' sunday':'')+(isToday?' today':'');
+    cell.className='day-cell'+(offDay?' off-day':'')+(isToday?' today':'');
     const num=document.createElement('div');
     num.className='day-num'+(before?' muted':'');
     num.textContent=d;
     cell.appendChild(num);
+    const dotMap={night:'dot-night',full:'dot-full','off-night':'dot-off-night','off-full':'dot-off-full',leave:'dot-leave'};
+    const dotLabel={night:'بليل',full:'صبح+بليل','off-night':'بليل إج','off-full':'صبح+بليل إج',leave:'إجازة'};
     if(shift!=='none'){
       const dot=document.createElement('div');
-      dot.className='shift-dot '+(DOT_CLASS[shift]||'');
-      dot.textContent=DOT_LABEL[shift]||shift;
+      dot.className='shift-dot '+(dotMap[shift]||'');
+      dot.textContent=dotLabel[shift]||shift;
       cell.appendChild(dot);
     }
-    if(!before) cell.onclick=()=>openShift(d);
+    if(!before&&!locked) cell.onclick=()=>openShift(d);
     grid.appendChild(cell);
   }
   renderSummary();
 }
 
 function renderSummary(){
-  const prefix=`${yr}-${String(mo+1).padStart(2,'0')}-`;
-  let bonus=0,count=0,leaveDays=0,leaveDeduct=0;
-  Object.keys(data).forEach(k=>{
+  const u=curUser();
+  const c=userCalc(u);
+  const prefix=`${u.id}|${yr}-${String(mo+1).padStart(2,'0')}-`;
+  let bonus=0,count=0,leaveDeduct=0,leaveDays=0;
+  Object.keys(DB.shifts).forEach(k=>{
     if(!k.startsWith(prefix)) return;
-    const v=data[k];
-    if(v==='leave'){leaveDays++;leaveDeduct+=DAILY;}
-    else if(v!=='none'){count++;bonus+=getBonus(v);}
+    const v=DB.shifts[k];
+    if(v==='leave'){leaveDays++;leaveDeduct+=c.daily;}
+    else if(v!=='none'){count++;bonus+=getBonus(u,v);}
   });
-  const total=BASE+bonus-leaveDeduct;
+  const total=u.salary+bonus-leaveDeduct;
+  const locked=isLocked(u.id,yr,mo);
   document.getElementById('summary-grid').innerHTML=`
-    <div class="s-card"><div class="s-label">المرتب الأساسي</div><div class="s-val">7,000ج</div></div>
-    <div class="s-card"><div class="s-label">شيفتات مسجلة</div><div class="s-val">${count}</div></div>
+    <div class="s-card"><div class="s-label">المرتب</div><div class="s-val">${u.salary.toLocaleString()}ج</div></div>
+    <div class="s-card"><div class="s-label">شيفتات</div><div class="s-val">${count}</div></div>
     <div class="s-card clickable" onclick="openDetail()"><div class="s-label">إجمالي الزيادة</div><div class="s-val blue">+${bonus.toFixed(0)}ج</div><div class="s-tap">اضغط للتفاصيل</div></div>
-    <div class="s-card"><div class="s-label">أيام إجازة مخصومة</div><div class="s-val ${leaveDays>0?'red':''}">-${leaveDeduct.toFixed(0)}ج</div></div>
-    <div class="s-card full"><div class="s-label">إجمالي الشهر</div><div class="s-val ${total>=BASE?'green':'red'}">${total.toFixed(0)}ج</div></div>
+    <div class="s-card"><div class="s-label">خصم إجازات</div><div class="s-val ${leaveDays>0?'red':''}">-${leaveDeduct.toFixed(0)}ج</div></div>
+    <div class="s-card full"><div class="s-label">إجمالي الشهر ${locked?'🔒':''}</div><div class="s-val ${total>=u.salary?'green':'red'}">${total.toFixed(0)}ج</div></div>
   `;
 }
 
 // SHIFT MODAL
 function openShift(day){
   selDay=day;
-  const k=key(yr,mo,day);
-  const cur=data[k]||'none';
-  const sun=isSun(yr,mo,day);
-  const avail=sun?SHIFTS:SHIFTS.filter(s=>s.id!=='off-night'&&s.id!=='off-full');
+  const u=curUser();
+  const c=userCalc(u);
+  const k=key(u.id,yr,mo,day);
+  const cur=DB.shifts[k]||'none';
+  const offDay=isSun(yr,mo,day,u.offDay);
+  const SHIFTS=offDay?[
+    {id:'none',label:'لا شيء / إجازة طبيعية',bonus:0},
+    {id:'night',label:'شيفت بليل (عادي)',bonus:0},
+    {id:'off-night',label:'شيفت بليل (يوم إجازة)',bonus:c.offNightBonus},
+    {id:'off-full',label:'صبح + بليل (يوم إجازة)',bonus:c.offFullBonus},
+  ]:[
+    {id:'none',label:'لا شيء',bonus:0},
+    {id:'night',label:'شيفت بليل (عادي)',bonus:0},
+    {id:'full',label:'صبح + بليل (عادي)',bonus:c.fullBonus},
+  ];
   document.getElementById('modal-root').innerHTML=`
     <div class="overlay" onclick="closeModal(event)">
       <div class="modal" onclick="event.stopPropagation()">
         <div class="modal-handle"></div>
-        <h3>${day} ${MONTHS_AR[mo]} — ${sun?'يوم إجازة (أحد)':'يوم عادي'}</h3>
-        ${avail.map(s=>`<button class="shift-btn ${cur===s.id?'active':''}" onclick="setShift('${s.id}')">
+        <h3>${day} ${MONTHS_AR[mo]} — ${offDay?'يوم إجازة ('+DAYS_AR[u.offDay]+')':'يوم عادي'}</h3>
+        ${SHIFTS.map(s=>`<button class="shift-btn ${cur===s.id?'active':''}" onclick="setShift('${s.id}')">
           <span>${s.label}</span>
           ${s.bonus>0?`<span class="shift-bonus">+${s.bonus.toFixed(0)}ج</span>`:''}
         </button>`).join('')}
@@ -352,20 +494,23 @@ function openShift(day){
 }
 
 function setShift(id){
-  data[key(yr,mo,selDay)]=id;
-  save();closeModal();render();
+  const u=curUser();
+  const k=key(u.id,yr,mo,selDay);
+  DB.shifts[k]=id;
+  saveData();closeModal();render();
 }
 
 // DETAIL MODAL
 function openDetail(){
-  const prefix=`${yr}-${String(mo+1).padStart(2,'0')}-`;
+  const u=curUser();
+  const prefix=`${u.id}|${yr}-${String(mo+1).padStart(2,'0')}-`;
   const days=[];
-  Object.keys(data).filter(k=>k.startsWith(prefix)&&data[k]!=='none'&&data[k]!=='leave'&&getBonus(data[k])>0).sort().forEach(k=>{
+  Object.keys(DB.shifts).filter(k=>k.startsWith(prefix)&&DB.shifts[k]!=='none'&&DB.shifts[k]!=='leave'&&getBonus(u,DB.shifts[k])>0).sort().forEach(k=>{
     const d=parseInt(k.split('-')[2]);
-    days.push({d,dayName:DAYS_AR[new Date(yr,mo,d).getDay()],shift:data[k],bonus:getBonus(data[k])});
+    days.push({d,dayName:DAYS_AR[new Date(yr,mo,d).getDay()],shift:DB.shifts[k],bonus:getBonus(u,DB.shifts[k])});
   });
   const total=days.reduce((a,b)=>a+b.bonus,0);
-  const rows=days.length===0?`<div class="empty-msg">مفيش أيام فيها زيادة لحد دلوقتي</div>`
+  const rows=days.length===0?`<div class="empty-msg">مفيش زيادات لحد دلوقتي</div>`
     :days.map(x=>`<div class="detail-row"><div><div class="detail-date">${x.dayName} ${x.d} ${MONTHS_AR[mo]}</div><div class="detail-type">${getLabel(x.shift)}</div></div><div class="detail-bonus">+${x.bonus.toFixed(0)}ج</div></div>`).join('');
   const tot=days.length>0?`<div class="detail-total"><span>الإجمالي</span><span class="total-val">+${total.toFixed(0)}ج</span></div>`:'';
   document.getElementById('modal-root').innerHTML=`
@@ -384,142 +529,286 @@ function changeMonth(dir){mo+=dir;if(mo>11){mo=0;yr++;}if(mo<0){mo=11;yr--;}rend
 
 // HISTORY
 function renderHistory(){
+  updateTopbars();
+  const u=curUser();
+  const c=userCalc(u);
   const months={};
-  Object.keys(data).forEach(k=>{
-    const [y,m]=k.split('-');
-    const mk=`${y}-${m}`;
+  const prefix=u.id+'|';
+  Object.keys(DB.shifts).forEach(k=>{
+    if(!k.startsWith(prefix)) return;
+    const parts=k.split('|')[1].split('-');
+    const mk=`${parts[0]}-${parts[1]}`;
     if(!months[mk]) months[mk]={bonus:0,deduct:0,shifts:{night:0,full:0,'off-night':0,'off-full':0},leaveDays:0};
-    const v=data[k];
-    if(v==='leave'){months[mk].leaveDays++;months[mk].deduct+=DAILY;}
-    else if(v!=='none'){months[mk].shifts[v]=(months[mk].shifts[v]||0)+1;months[mk].bonus+=getBonus(v);}
+    const v=DB.shifts[k];
+    if(v==='leave'){months[mk].leaveDays++;months[mk].deduct+=c.daily;}
+    else if(v!=='none'){months[mk].shifts[v]=(months[mk].shifts[v]||0)+1;months[mk].bonus+=getBonus(u,v);}
   });
   const keys=Object.keys(months).sort().reverse();
   const el=document.getElementById('history-list');
   if(!keys.length){el.innerHTML='<div class="no-history">مفيش بيانات لحد دلوقتي</div>';return;}
   el.innerHTML=keys.map(mk=>{
     const [y,m]=mk.split('-');
-    const mo_idx=parseInt(m)-1;
+    const mi=parseInt(m)-1;
     const d=months[mk];
-    const total=BASE+d.bonus-d.deduct;
+    const total=u.salary+d.bonus-d.deduct;
+    const locked=isLocked(u.id,parseInt(y),parseInt(m)-1);
     return `
-    <div class="month-card" onclick="toggleHistory('${mk}')">
-      <div class="month-card-header">
-        <span class="month-card-title">${MONTHS_AR[mo_idx]} ${y}</span>
-        <span class="month-card-total">${total.toFixed(0)}ج</span>
+    <div class="month-card">
+      <div class="month-card-header" onclick="toggleHistory('${mk}')">
+        <span class="month-card-title">${MONTHS_AR[mi]} ${y}</span>
+        <div class="month-card-right">
+          <span class="lock-badge ${locked?'locked':'open'}">${locked?'🔒 مقفول':'مفتوح'}</span>
+          <span class="month-card-total">${total.toFixed(0)}ج</span>
+        </div>
       </div>
       <div class="month-card-body" id="hist-${mk}">
-        <div class="stat-row"><span class="stat-label">المرتب الأساسي</span><span class="stat-val">7,000ج</span></div>
+        <div class="stat-row"><span class="stat-label">المرتب الأساسي</span><span class="stat-val">${u.salary.toLocaleString()}ج</span></div>
         ${d.shifts.night>0?`<div class="stat-row"><span class="stat-label">شيفت بليل عادي</span><span class="stat-val blue">${d.shifts.night} يوم</span></div>`:''}
-        ${d.shifts.full>0?`<div class="stat-row"><span class="stat-label">صبح + بليل عادي</span><span class="stat-val green">${d.shifts.full} يوم (+${(d.shifts.full*DAILY).toFixed(0)}ج)</span></div>`:''}
-        ${(d.shifts['off-night']||0)>0?`<div class="stat-row"><span class="stat-label">بليل يوم إجازة</span><span class="stat-val" style="color:var(--amber)">${d.shifts['off-night']} يوم (+${(d.shifts['off-night']*DAILY).toFixed(0)}ج)</span></div>`:''}
-        ${(d.shifts['off-full']||0)>0?`<div class="stat-row"><span class="stat-label">صبح+بليل يوم إجازة</span><span class="stat-val red">${d.shifts['off-full']} يوم (+${(d.shifts['off-full']*OFF_FULL_BONUS).toFixed(0)}ج)</span></div>`:''}
+        ${d.shifts.full>0?`<div class="stat-row"><span class="stat-label">صبح + بليل عادي</span><span class="stat-val green">${d.shifts.full} يوم (+${(d.shifts.full*c.fullBonus).toFixed(0)}ج)</span></div>`:''}
+        ${(d.shifts['off-night']||0)>0?`<div class="stat-row"><span class="stat-label">بليل يوم إجازة</span><span class="stat-val amber">${d.shifts['off-night']} يوم (+${(d.shifts['off-night']*c.offNightBonus).toFixed(0)}ج)</span></div>`:''}
+        ${(d.shifts['off-full']||0)>0?`<div class="stat-row"><span class="stat-label">صبح+بليل يوم إجازة</span><span class="stat-val red">${d.shifts['off-full']} يوم (+${(d.shifts['off-full']*c.offFullBonus).toFixed(0)}ج)</span></div>`:''}
         <div class="stat-row"><span class="stat-label">إجمالي الزيادة</span><span class="stat-val blue">+${d.bonus.toFixed(0)}ج</span></div>
         ${d.leaveDays>0?`<div class="stat-row"><span class="stat-label">أيام إجازة مخصومة</span><span class="stat-val red">-${d.deduct.toFixed(0)}ج (${d.leaveDays} يوم)</span></div>`:''}
-        <div class="stat-row"><span class="stat-label">إجمالي الشهر</span><span class="stat-val ${total>=BASE?'green':'red'}">${total.toFixed(0)}ج</span></div>
-        <button class="export-btn" onclick="exportMonth('${mk}',event)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          تصدير كـ TXT
-        </button>
+        <div class="stat-row"><span class="stat-label">إجمالي الشهر</span><span class="stat-val ${total>=u.salary?'green':'red'}">${total.toFixed(0)}ج</span></div>
+        <div class="action-row">
+          <button class="act-btn export" onclick="exportMonth('${u.id}','${mk}',event)">📄 تصدير TXT</button>
+          <button class="act-btn ${locked?'unlock-btn':'lock-btn'}" onclick="toggleLock('${u.id}','${mk}',event)">
+            ${locked?'🔓 فتح الشهر':'🔒 قفل الشهر'}
+          </button>
+        </div>
       </div>
     </div>`;
   }).join('');
 }
 
-function toggleHistory(mk){
-  const el=document.getElementById('hist-'+mk);
-  el.classList.toggle('open');
+function toggleHistory(mk){document.getElementById('hist-'+mk).classList.toggle('open');}
+
+function toggleLock(uid,mk,e){
+  e.stopPropagation();
+  const lk=uid+'|'+mk;
+  if(DB.locks[lk]) delete DB.locks[lk];
+  else DB.locks[lk]=true;
+  saveData();renderHistory();render();
 }
 
-function exportMonth(mk,e){
+function exportMonth(uid,mk,e){
   e.stopPropagation();
+  const u=getUser(uid);
+  const c=userCalc(u);
   const [y,m]=mk.split('-');
-  const mo_idx=parseInt(m)-1;
-  const prefix=`${y}-${m}-`;
-  let lines=[
-    `============================`,
-    `تقرير شهر ${MONTHS_AR[mo_idx]} ${y}`,
-    `حمزة — مرتب أساسي: 7,000ج`,
-    `============================`,
-    ``
-  ];
-  let bonus=0,deduct=0,leaveDays=0;
-  const dayEntries=Object.keys(data).filter(k=>k.startsWith(prefix)&&data[k]!=='none').sort();
-  dayEntries.forEach(k=>{
-    const d=parseInt(k.split('-')[2]);
-    const v=data[k];
-    const dt=new Date(parseInt(y),mo_idx,d);
-    if(v==='leave'){
-      lines.push(`${DAYS_AR[dt.getDay()]} ${d}/${parseInt(m)}/${y} — إجازة امتحانات (-${DAILY.toFixed(0)}ج)`);
-      deduct+=DAILY; leaveDays++;
-    } else {
-      const b=getBonus(v);
-      lines.push(`${DAYS_AR[dt.getDay()]} ${d}/${parseInt(m)}/${y} — ${getLabel(v)}${b>0?' (+'+b.toFixed(0)+'ج)':''}`);
-      bonus+=b;
-    }
+  const mi=parseInt(m)-1;
+  const prefix=`${uid}|${y}-${m}-`;
+  let lines=[`============================`,`تقرير ${u.name} — ${MONTHS_AR[mi]} ${y}`,`مرتب: ${u.salary.toLocaleString()}ج`,`============================`,``];
+  let bonus=0,deduct=0;
+  Object.keys(DB.shifts).filter(k=>k.startsWith(prefix)&&DB.shifts[k]!=='none').sort().forEach(k=>{
+    const d=parseInt(k.split('|')[1].split('-')[2]);
+    const v=DB.shifts[k];
+    const dt=new Date(parseInt(y),mi,d);
+    if(v==='leave'){lines.push(`${DAYS_AR[dt.getDay()]} ${d}/${m}/${y} — إجازة (-${c.daily.toFixed(0)}ج)`);deduct+=c.daily;}
+    else{const b=getBonus(u,v);lines.push(`${DAYS_AR[dt.getDay()]} ${d}/${m}/${y} — ${getLabel(v)}${b>0?' (+'+b.toFixed(0)+'ج)':''}`);bonus+=b;}
   });
-  const total=BASE+bonus-deduct;
-  lines.push(``);
-  lines.push(`============================`);
+  const total=u.salary+bonus-deduct;
+  lines.push(``);lines.push(`============================`);
   lines.push(`إجمالي الزيادة: +${bonus.toFixed(0)}ج`);
-  if(leaveDays>0) lines.push(`خصم الإجازات: -${deduct.toFixed(0)}ج (${leaveDays} يوم)`);
+  if(deduct>0) lines.push(`خصم الإجازات: -${deduct.toFixed(0)}ج`);
   lines.push(`إجمالي الشهر: ${total.toFixed(0)}ج`);
   lines.push(`============================`);
   const blob=new Blob([lines.join('\n')],{type:'text/plain;charset=utf-8'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=`shifts_${y}_${m}.txt`;
-  a.click();
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${u.name}_${y}_${m}.txt`;a.click();
 }
 
-// LEAVE CALCULATOR
-function calcLeave(){
-  const from=document.getElementById('leave-from').value;
-  const to=document.getElementById('leave-to').value;
-  if(!from||!to) return;
-  const f=new Date(from), t=new Date(to);
-  if(f>t) return;
-  let totalDays=0,sundays=0,workedDays=0;
-  const cur=new Date(f);
-  const workedList=[];
-  const leaveList=[];
-  while(cur<=t){
-    const k=`${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,'0')}-${String(cur.getDate()).padStart(2,'0')}`;
-    const shift=data[k]||'none';
-    totalDays++;
-    if(cur.getDay()===0) sundays++;
-    else if(shift!=='none'&&shift!=='leave'){workedDays++;workedList.push(`${cur.getDate()}/${cur.getMonth()+1}`);}
-    else leaveList.push(k);
-    cur.setDate(cur.getDate()+1);
+// LEAVE
+function renderLeaveCalendar(){
+  updateTopbars();
+  document.getElementById('leave-month-label').textContent=MONTHS_AR[leaveMo]+' '+leaveYr;
+  const u=curUser();
+  const grid=document.getElementById('leave-grid');
+  grid.innerHTML='';
+  const first=new Date(leaveYr,leaveMo,1).getDay();
+  const days=new Date(leaveYr,leaveMo+1,0).getDate();
+  for(let i=0;i<first;i++){const e=document.createElement('div');e.className='leave-day empty';grid.appendChild(e);}
+  for(let d=1;d<=days;d++){
+    const cell=document.createElement('div');
+    const k=key(u.id,leaveYr,leaveMo,d);
+    const shift=DB.shifts[k]||'none';
+    const offDay=isSun(leaveYr,leaveMo,d,u.offDay);
+    const before=beforeStart(leaveYr,leaveMo,d);
+    const dkey=`${leaveYr}-${leaveMo}-${d}`;
+    const isSelected=leaveSelected.has(dkey);
+    const hasShift=shift!=='none'&&shift!=='leave';
+    cell.className='leave-day'+(offDay?' off-day-l':'')+(isSelected?' selected':'')+(hasShift?' has-shift':'');
+    const num=document.createElement('div');
+    num.className='leave-day-num'+(before?' muted':'');
+    num.textContent=d;
+    cell.appendChild(num);
+    if(!before&&!hasShift&&!offDay){
+      cell.onclick=()=>{
+        if(isSelected) leaveSelected.delete(dkey);
+        else leaveSelected.add(dkey);
+        renderLeaveCalendar();
+      };
+    }
+    grid.appendChild(cell);
   }
-  const deductDays=totalDays-sundays-workedDays;
-  const deductAmount=deductDays*DAILY;
+  renderLeaveResult();
+}
+
+function renderLeaveResult(){
   const box=document.getElementById('leave-result-box');
-  box.style.display='block';
-  box.className='leave-result';
+  if(!leaveSelected.size){box.innerHTML='';return;}
+  const u=curUser();
+  const c=userCalc(u);
+  const deductDays=leaveSelected.size;
+  const deductAmount=deductDays*c.daily;
   box.innerHTML=`
-    <h4>نتيجة الحساب</h4>
-    <div class="result-row"><span class="stat-label">إجمالي أيام الفترة</span><span class="stat-val">${totalDays} يوم</span></div>
-    <div class="result-row"><span class="stat-label">أيام الأحد (غير محسوبة)</span><span class="stat-val" style="color:var(--amber)">${sundays} يوم</span></div>
-    <div class="result-row"><span class="stat-label">أيام نزلت شغل</span><span class="stat-val green">${workedDays} يوم${workedDays>0?' ('+workedList.join('، ')+')':''}</span></div>
-    <div class="result-row"><span class="stat-label">أيام الخصم الفعلية</span><span class="stat-val red">${deductDays} يوم</span></div>
-    <div class="result-row"><span class="stat-label">المبلغ المخصوم</span><span class="stat-val red">-${deductAmount.toFixed(0)}ج</span></div>
-    <div class="result-row"><span class="stat-label">إجمالي الشهر المتوقع</span><span class="stat-val ${(BASE-deductAmount)>=BASE?'green':'red'}">${(BASE-deductAmount).toFixed(0)}ج</span></div>
-  `;
-  document.getElementById('apply-leave-btn').style.display='block';
-  document.getElementById('apply-leave-btn')._leaveList=leaveList;
+    <div class="leave-result">
+      <h4>إجازة مختارة — ${deductDays} يوم</h4>
+      <div class="stat-row"><span class="stat-label">المبلغ المخصوم</span><span class="stat-val red">-${deductAmount.toFixed(0)}ج</span></div>
+      <div class="stat-row"><span class="stat-label">اليومية</span><span class="stat-val">${c.daily.toFixed(2)}ج/يوم</span></div>
+      <textarea class="reason-input" id="leave-reason" placeholder="سبب الإجازة (اختياري)" rows="2"></textarea>
+      <button class="apply-btn" onclick="applyLeave()">✓ تسجيل الإجازة</button>
+    </div>`;
 }
 
 function applyLeave(){
-  const btn=document.getElementById('apply-leave-btn');
-  const leaveList=btn._leaveList||[];
-  leaveList.forEach(k=>{data[k]='leave';});
-  save();
-  btn.style.display='none';
-  document.getElementById('leave-result-box').innerHTML+='<div style="color:var(--green);font-size:13px;margin-top:8px;font-weight:600;">✓ تم تسجيل الإجازة في التقويم</div>';
+  const u=curUser();
+  leaveSelected.forEach(dkey=>{
+    const [y,m,d]=dkey.split('-');
+    DB.shifts[key(u.id,parseInt(y),parseInt(m),parseInt(d))]='leave';
+  });
+  saveData();
+  leaveSelected=new Set();
+  renderLeaveCalendar();
   render();
 }
 
-render();
+function changeLeaveMonth(dir){leaveMo+=dir;if(leaveMo>11){leaveMo=0;leaveYr++;}if(leaveMo<0){leaveMo=11;leaveYr--;}leaveSelected=new Set();renderLeaveCalendar();}
+
+// USERS PAGE
+function renderUsers(){
+  const el=document.getElementById('users-list');
+  el.innerHTML=DB.users.map(u=>{
+    const c=userCalc(u);
+    return `
+    <div class="user-card ${u.id===currentUser?'active-user':''}">
+      <div class="user-card-left" onclick="switchUser('${u.id}')">
+        <div class="user-avatar" style="background:${colorForUser(u)};width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0">${avatarLetter(u.name)}</div>
+        <div class="user-card-info">
+          <h4>${u.name} ${u.id===currentUser?'✓':''}</h4>
+          <p>${u.salary.toLocaleString()}ج — إجازة: ${DAYS_AR[u.offDay]}</p>
+          <p style="font-size:11px;color:var(--text3);margin-top:1px">اليوم ${c.daily.toFixed(0)}ج — الساعة ${c.hourly.toFixed(2)}ج</p>
+        </div>
+      </div>
+      <button class="edit-btn-sm" onclick="openEditUser('${u.id}')">تعديل</button>
+    </div>`;
+  }).join('');
+}
+
+// ADD/EDIT USER
+function openAddUser(){
+  showUserForm(null);
+}
+
+function openEditUser(id){
+  showUserForm(getUser(id));
+}
+
+function showUserForm(u){
+  const isEdit=!!u;
+  const title=isEdit?`تعديل — ${u.name}`:'مستخدم جديد';
+  document.getElementById('modal-root').innerHTML=`
+    <div class="overlay" onclick="closeModal(event)">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <h3>${title}</h3>
+        <div class="form-group">
+          <label class="form-label">الاسم</label>
+          <input class="form-input" id="f-name" value="${isEdit?u.name:''}" placeholder="اسم الموظف">
+        </div>
+        <div class="form-group">
+          <label class="form-label">المرتب الشهري (ج)</label>
+          <input class="form-input" id="f-salary" type="number" value="${isEdit?u.salary:''}" placeholder="مثال: 7000" oninput="updatePreview()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">يوم الإجازة الأسبوعية</label>
+          <select class="form-select" id="f-offday">
+            ${DAYS_AR.map((d,i)=>`<option value="${i}" ${isEdit&&u.offDay===i?'selected':''}>${d}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Weekdays — من ساعة كام لساعة كام</label>
+          <div class="form-row">
+            <input class="form-input" id="f-wdstart" type="number" min="0" max="23" value="${isEdit?u.wdStart:14}" placeholder="بداية (مثال: 14)" oninput="updatePreview()">
+            <input class="form-input" id="f-wdend" type="number" min="1" max="24" value="${isEdit?u.wdEnd:23}" placeholder="نهاية (مثال: 23)" oninput="updatePreview()">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Weekends — من ساعة كام لساعة كام</label>
+          <div class="form-row">
+            <input class="form-input" id="f-westart" type="number" min="0" max="23" value="${isEdit?u.weStart:15}" placeholder="بداية (مثال: 15)" oninput="updatePreview()">
+            <input class="form-input" id="f-weend" type="number" min="1" max="24" value="${isEdit?u.weEnd:24}" placeholder="نهاية (مثال: 24)" oninput="updatePreview()">
+          </div>
+        </div>
+        <div class="preview-card" id="f-preview"></div>
+        <button class="submit-btn" onclick="saveUser('${isEdit?u.id:''}')">${isEdit?'حفظ التعديلات':'إنشاء المستخدم'}</button>
+        ${isEdit&&u.id!=='hamza'?`<button class="delete-btn" onclick="deleteUser('${u.id}')">حذف المستخدم</button>`:''}
+        <button class="cancel-btn" onclick="closeModal()">إلغاء</button>
+      </div>
+    </div>`;
+  updatePreview();
+}
+
+function updatePreview(){
+  const salary=parseFloat(document.getElementById('f-salary')?.value)||0;
+  const wdStart=parseInt(document.getElementById('f-wdstart')?.value)||0;
+  const wdEnd=parseInt(document.getElementById('f-wdend')?.value)||0;
+  const preview=document.getElementById('f-preview');
+  if(!preview) return;
+  if(!salary||wdEnd<=wdStart){preview.innerHTML='<p style="color:var(--text3)">أدخل المرتب ومواعيد الشيفت</p>';return;}
+  const daily=salary/30;
+  const hours=wdEnd-wdStart;
+  const hourly=salary/(30*hours);
+  const offFull=daily+(4*hourly*1.5);
+  preview.innerHTML=`<p>
+    اليومية: <b>${daily.toFixed(2)}ج</b><br>
+    ساعات الشيفت: <b>${hours} ساعة</b><br>
+    الساعة: <b>${hourly.toFixed(2)}ج</b><br>
+    زيادة صبح+بليل عادي: <b>+${daily.toFixed(0)}ج</b><br>
+    زيادة صبح+بليل إجازة: <b>+${offFull.toFixed(0)}ج</b>
+  </p>`;
+}
+
+function saveUser(id){
+  const name=document.getElementById('f-name').value.trim();
+  const salary=parseFloat(document.getElementById('f-salary').value);
+  const offDay=parseInt(document.getElementById('f-offday').value);
+  const wdStart=parseInt(document.getElementById('f-wdstart').value);
+  const wdEnd=parseInt(document.getElementById('f-wdend').value);
+  const weStart=parseInt(document.getElementById('f-westart').value);
+  const weEnd=parseInt(document.getElementById('f-weend').value);
+  if(!name||!salary||wdEnd<=wdStart){alert('تأكد من البيانات — المواعيد غلط أو ناقص حاجة');return;}
+  if(id){
+    const u=getUser(id);
+    u.name=name;u.salary=salary;u.offDay=offDay;
+    u.wdStart=wdStart;u.wdEnd=wdEnd;u.weStart=weStart;u.weEnd=weEnd;
+  } else {
+    const newId='user_'+Date.now();
+    const colorIdx=DB.users.length%COLORS.length;
+    DB.users.push({id:newId,name,salary,offDay,wdStart,wdEnd,weStart,weEnd,color:COLORS[colorIdx]});
+  }
+  saveData();closeModal();renderUsers();updateTopbars();
+}
+
+function deleteUser(id){
+  if(!confirm('هتحذف المستخدم ده وكل بياناته؟')) return;
+  DB.users=DB.users.filter(u=>u.id!==id);
+  Object.keys(DB.shifts).forEach(k=>{if(k.startsWith(id+'|')) delete DB.shifts[k];});
+  if(currentUser===id) currentUser=DB.users[0].id;
+  saveData();closeModal();renderUsers();updateTopbars();render();
+}
+
+// INIT
+updateTopbars();render();
 </script>
 </body>
 </html>
