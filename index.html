@@ -56,20 +56,62 @@ body.en .page.active{transform:translateX(0);}
 .user-avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
 
 /* BOTTOM NAV */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;width:100%;background:rgba(21,23,27,0.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--border2);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom);}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:9px 0 7px;cursor:pointer;gap:2px;transition:transform 0.12s cubic-bezier(.2,.8,.2,1);}
-.nav-item:active{transform:scale(0.85);}
-.nav-item span{font-size:10px;font-weight:500;color:var(--text3);transition:color 0.15s;}
-.nav-item svg{width:21px;height:21px;stroke:var(--text3);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:0.7;transition:stroke 0.15s,opacity 0.15s;}
-.nav-item.active{transform:translateY(-2px);}
-.nav-item.active span{color:var(--blue);}
-.nav-item.active svg{stroke:var(--blue);opacity:1;}
-.nav-item.active::after{content:'';display:block;width:18px;height:3px;background:var(--blue);border-radius:2px;margin-top:2px;}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;width:100%;background:rgba(21,23,27,0.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--border2);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom);border-radius:18px 18px 0 0;overflow:hidden;}
+.nav-indicator{position:absolute;top:0;height:3px;width:25%;background:var(--blue);border-radius:0 0 3px 3px;transition:transform 0.3s cubic-bezier(.2,.8,.2,1);}
+
+/* ANALYTICS */
+.an-section{margin-bottom:14px;}
+.an-section-title{font-size:12px;font-weight:700;color:var(--text3);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:8px;padding:0 2px;}
+.an-cards{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.an-card{background:var(--surface2);border-radius:var(--radius);padding:14px;border:1px solid var(--border2);}
+.an-card.full{grid-column:1/-1;}
+.an-card.highlight{border-color:rgba(74,158,255,0.3);background:var(--blue-dim);}
+.an-card.highlight-green{border-color:rgba(76,175,125,0.3);background:var(--green-dim);}
+.an-label{font-size:11px;color:var(--text2);margin-bottom:4px;}
+.an-val{font-size:20px;font-weight:700;color:var(--text);}
+.an-val.blue{color:var(--blue);text-shadow:0 0 12px rgba(74,158,255,0.3);}
+.an-val.green{color:var(--green);text-shadow:0 0 12px rgba(76,175,125,0.25);}
+.an-val.amber{color:var(--amber);}
+.an-val.red{color:var(--red);}
+.an-sub{font-size:11px;color:var(--text3);margin-top:3px;}
+.an-bar-wrap{margin-top:10px;}
+.an-bar-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:4px;}
+.an-bar-track{background:var(--surface3);border-radius:4px;height:8px;overflow:hidden;}
+.an-bar-fill{height:100%;border-radius:4px;transition:width 0.6s cubic-bezier(.2,.8,.2,1);}
+.an-chart{margin-top:4px;}
+.an-chart-bars{display:flex;align-items:flex-end;gap:4px;height:80px;padding:0 2px;}
+.an-chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.an-chart-bar{width:100%;border-radius:4px 4px 0 0;min-height:4px;transition:height 0.5s cubic-bezier(.2,.8,.2,1);}
+.an-chart-bar-lbl{font-size:8px;color:var(--text3);text-align:center;}
+.an-prediction{background:linear-gradient(135deg,rgba(74,158,255,0.15),rgba(181,123,255,0.1));border:1px solid rgba(74,158,255,0.25);border-radius:var(--radius);padding:16px;margin-bottom:14px;}
+.an-prediction h4{font-size:13px;font-weight:700;color:var(--blue);margin-bottom:10px;}
+.an-prediction-val{font-size:28px;font-weight:700;color:var(--text);margin:6px 0;}
+.an-prediction-sub{font-size:12px;color:var(--text2);line-height:1.6;}
+.an-streak{display:flex;align-items:center;gap:10px;background:var(--surface2);border-radius:var(--radius);padding:14px;border:1px solid var(--border2);margin-bottom:8px;}
+.an-streak-icon{font-size:24px;}
+.an-streak-text h4{font-size:14px;font-weight:600;}
+.an-streak-text p{font-size:12px;color:var(--text2);margin-top:2px;}
+.an-empty{text-align:center;padding:40px 20px;color:var(--text3);}
+.an-empty div{font-size:40px;margin-bottom:12px;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 8px;cursor:pointer;gap:2px;transition:transform 0.18s cubic-bezier(.2,.8,.2,1);}
+.nav-item:active{transform:scale(0.8);}
+.nav-item span{font-size:10px;font-weight:500;color:var(--text3);transition:color 0.15s,font-weight 0.15s;}
+.nav-item svg{width:21px;height:21px;stroke:var(--text3);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:0.7;transition:all 0.2s ease;}
+.nav-item.active{transform:translateY(-3px) scale(1.05);}
+.nav-item.active span{color:var(--blue);font-weight:600;}
+.nav-item.active svg{stroke:var(--blue);opacity:1;transform:scale(1.1);filter:drop-shadow(0 0 6px rgba(74,158,255,0.4));}
+@media(hover:hover){.nav-item:hover{opacity:0.85;}}
 
 /* FAB */
-.fab{position:fixed;bottom:82px;right:16px;width:56px;height:56px;border-radius:50%;background:var(--blue);color:#fff;font-size:26px;border:none;box-shadow:0 6px 20px rgba(0,0,0,0.45),0 0 0 1px rgba(74,158,255,0.25);cursor:pointer;z-index:49;display:flex;align-items:center;justify-content:center;line-height:1;}
+.fab{position:fixed;bottom:90px;right:16px;width:56px;height:56px;border-radius:50%;background:var(--blue);color:#fff;font-size:26px;border:none;box-shadow:0 10px 25px rgba(0,0,0,0.5),0 0 0 1px rgba(74,158,255,0.3);cursor:pointer;z-index:49;display:flex;align-items:center;justify-content:center;line-height:1;transition:all 0.2s ease;}
 .fab:active{transform:scale(0.88);}
+.fab.hide{transform:scale(0);opacity:0;pointer-events:none;}
 body.en .fab{right:auto;left:16px;}
+
+/* UNDO TOAST */
+.toast{position:fixed;bottom:85px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface3);color:var(--text);font-size:13px;font-weight:500;padding:10px 16px;border-radius:24px;border:1px solid var(--border2);z-index:200;display:flex;align-items:center;gap:12px;opacity:0;transition:all 0.25s ease;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;}
+.toast-undo{background:none;border:none;color:var(--blue);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;padding:0;}
 
 /* MONTH NAV */
 .month-nav{display:flex;align-items:center;justify-content:space-between;padding:6px 16px;}
@@ -288,11 +330,32 @@ body.en .modal{margin:0;}
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     <span id="add-user-lbl">إضافة مستخدم</span>
   </button>
+  <div style="display:flex;gap:8px;margin:10px 12px 0">
+    <button onclick="backupDB()" style="flex:1;padding:12px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text2);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">💾 Backup</button>
+    <button onclick="restoreDB()" style="flex:1;padding:12px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text2);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">📂 Restore</button>
+  </div>
+</div>
+
+<!-- ANALYTICS PAGE -->
+<div class="page" id="page-analytics">
+  <div class="topbar">
+    <div><h1 id="analytics-title">تحليلات</h1><p id="analytics-sub"></p></div>
+    <div class="topbar-right">
+      <button class="lang-btn" onclick="toggleLang()">EN</button>
+      <div class="user-switcher" onclick="openUserSwitch()">
+        <div class="user-avatar" id="analytics-avatar">ح</div>
+        <span id="analytics-user-short">حمزة</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+    </div>
+  </div>
+  <div id="analytics-content" style="padding:0 12px 12px"></div>
 </div>
 
 <button class="fab" id="fab-btn" onclick="openTodayShift()">+</button>
 
 <div class="bottom-nav">
+  <div class="nav-indicator" id="nav-indicator"></div>
   <div class="nav-item active" id="nav-calendar" onclick="showPage('calendar')">
     <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
     <span id="nav-lbl-calendar">التقويم</span>
@@ -305,9 +368,14 @@ body.en .modal{margin:0;}
     <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
     <span id="nav-lbl-leave">الإجازات</span>
   </div>
+  <div class="nav-item" id="nav-analytics" onclick="showPage('analytics')">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <span id="nav-lbl-analytics">تحليلات</span>
+  </div>
 </div>
 </div>
 <div id="modal-root"></div>
+<div class="toast" id="toast"><span id="toast-msg"></span><button class="toast-undo" onclick="undoShift()" id="toast-undo-btn">↩ تراجع</button></div>
 
 <script>
 // TRANSLATIONS
@@ -481,15 +549,16 @@ function showPage(p){
   if(p==='leave'){leaveSelected=new Set();renderLeaveCalendar();}
   if(p==='users') renderUsers();
   if(p==='calendar') render();
+  if(p==='analytics') setTimeout(()=>renderAnalytics(),0);
 }
 
 function updateTopbars(){
   const u=curUser();
   const c=userCalc(u);
-  ['cal','hist','leave'].forEach(p=>{
-    const nm=document.getElementById(p+'-user-name');
-    const av=document.getElementById(p+'-avatar');
-    const sh=document.getElementById(p+'-user-short');
+  ['cal','hist','leave','analytics'].forEach(p=>{
+    const nm=document.getElementById(p+'-user-name')||document.getElementById(p==='analytics'?'analytics-sub':p+'-user-name');
+    const av=document.getElementById(p+'-avatar')||document.getElementById(p==='analytics'?'analytics-avatar':p+'-avatar');
+    const sh=document.getElementById(p+'-user-short')||document.getElementById(p==='analytics'?'analytics-user-short':p+'-user-short');
     if(nm) nm.textContent=`${u.salary.toLocaleString()} — ${t('daily')} ${c.daily.toFixed(0)}`;
     if(av){av.textContent=avatarLetter(u.name);av.style.background=colorForUser(u);}
     if(sh) sh.textContent=u.name;
@@ -569,7 +638,12 @@ function render(){
       dot.textContent=dotLabel[dotIdx[shift]]||shift;
       cell.appendChild(dot);
     }
-    if(!before&&!locked) cell.onclick=()=>openShift(d);
+    if(!before&&!locked){
+      cell.addEventListener('touchstart',()=>startPress(d),{passive:true});
+      cell.addEventListener('touchend',()=>endPress(d),{passive:true});
+      cell.addEventListener('touchcancel',()=>{if(pressTimer){clearTimeout(pressTimer);pressTimer=null;}});
+      cell.onclick=null;
+    }
     grid.appendChild(cell);
   }
   // legend
@@ -974,28 +1048,376 @@ function deleteUser(id){
   saveDB();closeModal();renderUsers();updateTopbars();render();
 }
 
-// INIT
+// ANALYTICS
+function renderAnalytics(){
+  updateTopbars();
+  const u=curUser();
+  const c=userCalc(u);
+  const el=document.getElementById('analytics-content');
+  const isAr=lang==='ar';
+
+  // Gather all months data
+  const months={};
+  const prefix=u.id+'|';
+  Object.keys(DB.shifts).forEach(k=>{
+    if(!k.startsWith(prefix)) return;
+    const parts=k.split('|')[1].split('-');
+    const mk=`${parts[0]}-${parts[1]}`;
+    if(!months[mk]) months[mk]={bonus:0,deduct:0,nights:0,fulls:0,offNights:0,offFulls:0,leaveDays:0,totalShifts:0};
+    const v=DB.shifts[k];
+    if(v==='leave'){months[mk].leaveDays++;months[mk].deduct+=c.daily;}
+    else if(v==='night'){months[mk].nights++;months[mk].bonus+=0;months[mk].totalShifts++;}
+    else if(v==='full'){months[mk].fulls++;months[mk].bonus+=c.fullBonus;months[mk].totalShifts++;}
+    else if(v==='off-night'){months[mk].offNights++;months[mk].bonus+=c.offNightBonus;months[mk].totalShifts++;}
+    else if(v==='off-full'){months[mk].offFulls++;months[mk].bonus+=c.offFullBonus;months[mk].totalShifts++;}
+  });
+
+  const mkKeys=Object.keys(months).sort();
+  if(!mkKeys.length){
+    el.innerHTML=`<div class="an-empty"><div>📊</div>${isAr?'مفيش بيانات لحد دلوقتي':'No data yet'}<br><span style="font-size:12px;color:var(--text3)">${isAr?'ابدأ بتسجيل الشيفتات':'Start logging shifts'}</span></div>`;
+    return;
+  }
+
+  // Calculate totals per month
+  const monthTotals=mkKeys.map(mk=>{
+    const d=months[mk];
+    const adv=getTotalAdvance(u.id,parseInt(mk.split('-')[0]),parseInt(mk.split('-')[1])-1);
+    return {mk,net:u.salary+d.bonus-d.deduct-adv,...d,adv};
+  });
+
+  const allNets=monthTotals.map(m=>m.net);
+  const avgNet=allNets.reduce((a,b)=>a+b,0)/allNets.length;
+  const maxNet=Math.max(...allNets);
+  const maxMk=monthTotals.find(m=>m.net===maxNet)?.mk||'';
+  const [maxY,maxM]=maxMk.split('-');
+
+  const allBonus=monthTotals.map(m=>m.bonus);
+  const avgBonus=allBonus.reduce((a,b)=>a+b,0)/allBonus.length;
+  const totalShiftsAll=monthTotals.reduce((a,m)=>a+m.totalShifts,0);
+  const totalLeaveDays=monthTotals.reduce((a,m)=>a+m.leaveDays,0);
+  const totalMonths=mkKeys.length;
+
+  // Current month prediction
+  const todayD=new Date();
+  const curMk=`${todayD.getFullYear()}-${String(todayD.getMonth()+1).padStart(2,'0')}`;
+  const curData=months[curMk];
+  const dayOfMonth=todayD.getDate();
+  const daysInMonth=new Date(todayD.getFullYear(),todayD.getMonth()+1,0).getDate();
+  let predictedNet=u.salary;
+  if(curData&&dayOfMonth>1){
+    const dailyRate=(curData.bonus-curData.deduct)/dayOfMonth;
+    const curAdv=getTotalAdvance(u.id,todayD.getFullYear(),todayD.getMonth());
+    predictedNet=u.salary+(dailyRate*daysInMonth)-curAdv;
+  }
+
+  // Chart data — last 6 months
+  const last6=monthTotals.slice(-6);
+  const maxBar=Math.max(...last6.map(m=>m.net),u.salary);
+
+  // Streak calculation
+  let streak=0,maxStreak=0,tempStreak=0;
+  const today=new Date();
+  const todayKey=`${u.id}|${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  // count consecutive worked days backwards
+  for(let i=0;i<60;i++){
+    const d2=new Date(today);d2.setDate(today.getDate()-i);
+    const k2=`${u.id}|${d2.getFullYear()}-${String(d2.getMonth()+1).padStart(2,'0')}-${String(d2.getDate()).padStart(2,'0')}`;
+    const v=DB.shifts[k2];
+    if(v&&v!=='none'&&v!=='leave'){if(i===0||streak>0) streak++; tempStreak++;}
+    else{if(tempStreak>maxStreak) maxStreak=tempStreak; tempStreak=0; if(streak>0) break;}
+  }
+  if(tempStreak>maxStreak) maxStreak=tempStreak;
+
+  el.innerHTML=`
+    <!-- PREDICTION -->
+    <div class="an-prediction">
+      <h4>🔮 ${isAr?'توقع آخر الشهر':'Month Prediction'}</h4>
+      <div class="an-prediction-val">${predictedNet.toFixed(0)} ${isAr?'ج':'EGP'}</div>
+      <div class="an-prediction-sub">${isAr?`بناءً على ${dayOfMonth} يوم من الشهر ده`:`Based on ${dayOfMonth} days this month`}</div>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div class="an-section">
+      <div class="an-section-title">${isAr?'إجمالي':'Overview'}</div>
+      <div class="an-cards">
+        <div class="an-card highlight">
+          <div class="an-label">${isAr?'متوسط الشهر':'Avg Month'}</div>
+          <div class="an-val blue">${avgNet.toFixed(0)}</div>
+          <div class="an-sub">${isAr?`على ${totalMonths} شهر`:`over ${totalMonths} months`}</div>
+        </div>
+        <div class="an-card highlight-green">
+          <div class="an-label">${isAr?'أعلى شهر':'Best Month'}</div>
+          <div class="an-val green">${maxNet.toFixed(0)}</div>
+          <div class="an-sub">${maxY?T[lang].months[parseInt(maxM)-1]+' '+maxY:'-'}</div>
+        </div>
+        <div class="an-card">
+          <div class="an-label">${isAr?'متوسط الزيادة':'Avg Bonus'}</div>
+          <div class="an-val amber">+${avgBonus.toFixed(0)}</div>
+          <div class="an-sub">${isAr?'في الشهر':'per month'}</div>
+        </div>
+        <div class="an-card">
+          <div class="an-label">${isAr?'إجمالي الشيفتات':'Total Shifts'}</div>
+          <div class="an-val">${totalShiftsAll}</div>
+          <div class="an-sub">${isAr?`${totalLeaveDays} يوم إجازة`:`${totalLeaveDays} leave days`}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHART -->
+    <div class="an-section">
+      <div class="an-section-title">${isAr?'آخر 6 شهور':'Last 6 Months'}</div>
+      <div class="an-card full">
+        <div class="an-chart-bars">
+          ${last6.map(m=>{
+            const [y,mo2]=m.mk.split('-');
+            const pct=Math.max((m.net/maxBar)*100,4);
+            const color=m.net>=u.salary?'var(--green)':'var(--red)';
+            const shortMo=T[lang].months[parseInt(mo2)-1].slice(0,3);
+            return `<div class="an-chart-bar-wrap">
+              <div class="an-chart-bar" style="height:${pct}%;background:${color};opacity:0.85"></div>
+              <div class="an-chart-bar-lbl">${shortMo}</div>
+            </div>`;
+          }).join('')}
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:10px;color:var(--text3)">
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block"></span>${isAr?'فوق الراتب':'Above salary'}</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block"></span>${isAr?'تحت الراتب':'Below salary'}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STREAK -->
+    ${streak>1?`<div class="an-section">
+      <div class="an-section-title">${isAr?'تسلسل الشغل':'Work Streak'}</div>
+      <div class="an-streak">
+        <div class="an-streak-icon">🔥</div>
+        <div class="an-streak-text">
+          <h4>${streak} ${isAr?'يوم متتالي':'days in a row'}</h4>
+          <p>${isAr?`أعلى تسلسل: ${maxStreak} يوم`:`Best streak: ${maxStreak} days`}</p>
+        </div>
+      </div>
+    </div>`:''}
+
+    <!-- SHIFT BREAKDOWN -->
+    <div class="an-section">
+      <div class="an-section-title">${isAr?'توزيع الشيفتات':'Shift Breakdown'}</div>
+      <div class="an-card full">
+        ${[
+          {label:isAr?'شيفت بليل عادي':'Night Regular',val:monthTotals.reduce((a,m)=>a+m.nights,0),color:'var(--blue)'},
+          {label:isAr?'صبح + بليل عادي':'Full Regular',val:monthTotals.reduce((a,m)=>a+m.fulls,0),color:'var(--green)'},
+          {label:isAr?'بليل يوم إجازة':'Night Day Off',val:monthTotals.reduce((a,m)=>a+m.offNights,0),color:'var(--amber)'},
+          {label:isAr?'صبح+بليل يوم إجازة':'Full Day Off',val:monthTotals.reduce((a,m)=>a+m.offFulls,0),color:'var(--red)'},
+        ].map(s=>{
+          const pct=totalShiftsAll>0?Math.round((s.val/totalShiftsAll)*100):0;
+          return `<div class="an-bar-wrap">
+            <div class="an-bar-label"><span>${s.label}</span><span style="color:${s.color}">${s.val} (${pct}%)</span></div>
+            <div class="an-bar-track"><div class="an-bar-fill" style="width:${pct}%;background:${s.color}"></div></div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+
+let currentPage='calendar';
+let undoStack=null,toastTimer=null;
 updateTopbars();render();
 
-// Override showPage to track currentPage
+// SERVICE WORKER + NOTIFICATIONS
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/sw.js').then(reg=>{
+    navigator.serviceWorker.addEventListener('message',e=>{
+      if(e.data?.type==='CHECK_TODAY'){
+        const u=curUser();
+        const k=`${u.id}|${e.data.date}`;
+        const shift=DB.shifts[k]||'none';
+        if(shift==='none') navigator.serviceWorker.controller?.postMessage({type:'TODAY_NOT_LOGGED'});
+      }
+    });
+  }).catch(()=>{});
+}
+
+function checkTodayShift(){
+  const u=curUser();
+  const now=new Date();
+  const k=key(u.id,now.getFullYear(),now.getMonth(),now.getDate());
+  if(DB.shifts[k]&&DB.shifts[k]!=='none') return;
+  if(!('Notification' in window)||Notification.permission!=='granted') return;
+  const msgs=lang==='ar'?[
+    'عندك شيفت النهارده؟ متنساش تسجله! 📅',
+    'سجّل شيفتك النهارده عشان المرتب يبقى صح 💰',
+    'تذكير: لسه مسجلتش شيفت النهارده ⏰'
+  ]:[
+    "Don't forget to log today's shift! 📅",
+    "Log your shift to keep salary accurate 💰",
+    "Reminder: today's shift not logged yet ⏰"
+  ];
+  const msg=msgs[Math.floor(Math.random()*msgs.length)];
+  const n=new Notification('My Shifts',{body:msg,icon:'/icon.png',tag:'shift-reminder'});
+  n.onclick=()=>{window.focus();n.close();};
+}
+
+function scheduleLocalChecks(){
+  const TIMES=[9,14,20];
+  const now=new Date();
+  TIMES.forEach(h=>{
+    const target=new Date(now);
+    target.setHours(h,0,0,0);
+    if(target<=now) target.setDate(target.getDate()+1);
+    setTimeout(()=>checkTodayShift(),target-now);
+  });
+}
+
+function requestNotifPermission(){
+  if(!('Notification' in window)) return;
+  if(Notification.permission==='granted'){scheduleLocalChecks();return;}
+  if(Notification.permission==='default'){
+    Notification.requestPermission().then(p=>{
+      if(p==='granted'){
+        scheduleLocalChecks();
+        showToastMsg(lang==='ar'?'✅ هيتذكرك 3 مرات في اليوم':'✅ Will remind you 3 times a day');
+      }
+    });
+  }
+}
+
+function showToastMsg(msg){
+  const toast=document.getElementById('toast');
+  const msgEl=document.getElementById('toast-msg');
+  const undoBtn=document.getElementById('toast-undo-btn');
+  if(!toast) return;
+  msgEl.textContent=msg;
+  undoBtn.style.display='none';
+  toast.classList.add('show');
+  setTimeout(()=>{toast.classList.remove('show');undoBtn.style.display='';},3000);
+}
+
+setTimeout(requestNotifPermission,3000);
+
+// NAV INDICATOR
+const NAV_ORDER=['calendar','history','leave','analytics'];
+function moveIndicator(idx){
+  const ind=document.getElementById('nav-indicator');
+  if(!ind) return;
+  const realIdx=lang==='ar'?(NAV_ORDER.length-1-idx):idx;
+  ind.style.transform=`translateX(${realIdx*100}%)`;
+}
+moveIndicator(0);
+
+// OVERRIDE showPage
 const _origShowPage=showPage;
 window.showPage=function(p){
   currentPage=p;
   _origShowPage(p);
+  moveIndicator(NAV_ORDER.indexOf(p));
   const fab=document.getElementById('fab-btn');
-  if(fab) fab.style.display=p==='calendar'?'flex':'none';
+  if(!fab) return;
+  const fabIcons={calendar:'+',history:'📄',leave:'✓',analytics:'',users:'+'};
+  const fabActions={calendar:'openTodayShift()',history:'exportCurrentMonth()',leave:'applyLeave()',users:'openAddUser()'};
+  fab.innerHTML=fabIcons[p]||'+';
+  fab.setAttribute('onclick',fabActions[p]||'openTodayShift()');
+  fab.classList.toggle('hide',p==='users'||p==='analytics');
 };
 
-// FAB — open today's shift
+// QUICK TAP CYCLING (tap = next shift, no modal)
+const CYCLE_NORMAL=['none','night','full'];
+const CYCLE_OFFDAY=['none','night','off-night','off-full'];
+function quickTapDay(day){
+  const u=curUser();
+  if(isLocked(u.id,yr,mo)) return;
+  const k=key(u.id,yr,mo,day);
+  const cur=DB.shifts[k]||'none';
+  const offDay=isOffDay(yr,mo,day,u.offDay);
+  const cycle=offDay?CYCLE_OFFDAY:CYCLE_NORMAL;
+  const idx=cycle.indexOf(cur);
+  const next=cycle[(idx+1)%cycle.length];
+  // save for undo
+  undoStack={k,prev:cur};
+  DB.shifts[k]=next;
+  saveDB();render();
+  showToast(next,day);
+}
+
+// LONG PRESS = modal (keep existing openShift)
+let pressTimer=null;
+function startPress(day){
+  pressTimer=setTimeout(()=>{pressTimer=null;openShift(day);},500);
+}
+function endPress(day){
+  if(pressTimer){clearTimeout(pressTimer);pressTimer=null;quickTapDay(day);}
+}
+
+// TOAST + UNDO
+function showToast(shiftId,day){
+  if(toastTimer) clearTimeout(toastTimer);
+  const msg=document.getElementById('toast-msg');
+  const toast=document.getElementById('toast');
+  const undoBtn=document.getElementById('toast-undo-btn');
+  const label=getShiftLabel(shiftId);
+  msg.textContent=`${day} ${T[lang].months[mo]} — ${label}`;
+  undoBtn.textContent=lang==='ar'?'↩ تراجع':'↩ Undo';
+  toast.classList.add('show');
+  toastTimer=setTimeout(()=>{toast.classList.remove('show');undoStack=null;},3000);
+}
+
+function undoShift(){
+  if(!undoStack) return;
+  DB.shifts[undoStack.k]=undoStack.prev;
+  saveDB();render();
+  undoStack=null;
+  const toast=document.getElementById('toast');
+  toast.classList.remove('show');
+  if(toastTimer) clearTimeout(toastTimer);
+}
+
+// FAB FUNCTIONS
 function openTodayShift(){
   const today=new Date();
   if(today.getMonth()===mo&&today.getFullYear()===yr){
     openShift(today.getDate());
   } else {
     yr=today.getFullYear();mo=today.getMonth();
-    render();
-    setTimeout(()=>openShift(today.getDate()),100);
+    render();setTimeout(()=>openShift(today.getDate()),100);
   }
+}
+
+function exportCurrentMonth(){
+  const u=curUser();
+  const mk=`${yr}-${String(mo+1).padStart(2,'0')}`;
+  exportMonth(u.id,mk,{stopPropagation:()=>{}});
+}
+
+// BACKUP & RESTORE
+function backupDB(){
+  const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`myshifts_backup_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+}
+
+function restoreDB(){
+  const input=document.createElement('input');
+  input.type='file';input.accept='.json';
+  input.onchange=e=>{
+    const file=e.target.files[0];
+    if(!file) return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      try{
+        const restored=JSON.parse(ev.target.result);
+        if(!restored.users||!restored.shifts) throw new Error();
+        Object.assign(DB,restored);
+        saveDB();
+        currentUser=DB.users[0].id;
+        render();renderHistory();renderUsers();updateTopbars();
+        alert(lang==='ar'?'✅ تم استعادة البيانات':'✅ Data restored');
+      }catch(e){alert(lang==='ar'?'❌ الملف غلط':'❌ Invalid file');}
+    };
+    reader.readAsText(file);
+  };
+  input.click();
 }
 
 // ANIMATE number value
