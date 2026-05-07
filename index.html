@@ -2,10 +2,11 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#0f0f0f">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b0c0f">
 <link rel="apple-touch-icon" href="icon.png">
 <title>My Shifts</title>
 <style>
@@ -26,7 +27,7 @@ button,.nav-item,.day-cell,.s-card,.shift-btn,.user-card,.month-card,.act-btn,.n
   transition:all 0.15s ease;
 }
 
-body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;padding-top:env(safe-area-inset-top);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);}
 body.en{font-family:'Inter',sans-serif;direction:ltr;}
 .app{max-width:100%;margin:0 auto;position:relative;min-height:100dvh;}
 
