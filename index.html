@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0b0c0f">
+<meta name="theme-color" content="#15171b">
 <link rel="apple-touch-icon" href="icon.png">
 <title>My Shifts</title>
 <style>
@@ -27,7 +27,7 @@ button,.nav-item,.day-cell,.s-card,.shift-btn,.user-card,.month-card,.act-btn,.n
   transition:all 0.15s ease;
 }
 
-body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;padding-top:env(safe-area-inset-top);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);}
+body{font-family:'Cairo',sans-serif;background:#0b0c0f;color:var(--text);min-height:100dvh;overflow-x:hidden;margin:0;padding-top:env(safe-area-inset-top);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);}
 body.en{font-family:'Inter',sans-serif;direction:ltr;}
 .app{max-width:100%;margin:0 auto;position:relative;min-height:100dvh;}
 
@@ -43,7 +43,7 @@ body.en .page{transform:translateX(-18px);}
 body.en .page.active{transform:translateX(0);}
 
 /* TOPBAR — compact */
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:20px 16px 10px;background:linear-gradient(180deg,rgba(21,23,27,1) 0%,rgba(21,23,27,0.85) 60%,rgba(21,23,27,0) 100%);}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top) + 20px) 16px 10px;background:var(--surface);}
 .topbar h1{font-size:20px;font-weight:700;}
 .topbar p{font-size:11px;color:var(--text2);margin-top:1px;}
 .topbar-right{display:flex;align-items:center;gap:7px;}
