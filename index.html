@@ -492,6 +492,7 @@ if(!DB.users||!DB.users.length) DB.users=DEFAULT_USERS;
 if(!DB.shifts) DB.shifts={};
 if(!DB.locks) DB.locks={};
 if(!DB.advances) DB.advances={};
+if(!DB.notes) DB.notes={};
 
 let currentUser=DB.users[0].id;
 let yr=2026,mo=4,leaveYr=2026,leaveMo=4;
@@ -639,6 +640,13 @@ function render(){
       dot.textContent=dotLabel[dotIdx[shift]]||shift;
       cell.appendChild(dot);
     }
+    // note indicator
+    const noteKey=`note|${key(u.id,yr,mo,d)}`;
+    if(DB.notes?.[noteKey]){
+      const noteDot=document.createElement('div');
+      noteDot.style.cssText='width:5px;height:5px;border-radius:50%;background:var(--amber);margin-top:1px;flex-shrink:0';
+      cell.appendChild(noteDot);
+    }
     if(!before&&!locked){
       cell.addEventListener('touchstart',()=>startPress(d),{passive:true});
       cell.addEventListener('touchend',()=>endPress(d),{passive:true});
@@ -697,6 +705,8 @@ function openShift(day){
     {id:'full',label:t('fullShift'),bonus:c.fullBonus},
   ];
   const dayName=T[lang].days[new Date(yr,mo,day).getDay()];
+  const noteKey=`note|${key(u.id,yr,mo,day)}`;
+  const curNote=DB.notes?.[noteKey]||'';
   document.getElementById('modal-root').innerHTML=`
     <div class="overlay" onclick="closeModal(event)">
       <div class="modal" onclick="event.stopPropagation()">
@@ -706,12 +716,29 @@ function openShift(day){
           <span>${s.label}</span>
           ${s.bonus>0?`<span class="shift-bonus">+${s.bonus.toFixed(0)}</span>`:''}
         </button>`).join('')}
+        <div style="margin-top:12px">
+          <div class="form-label" style="margin-bottom:6px">📝 ${lang==='ar'?'ملاحظة':'Note'}</div>
+          <textarea id="day-note" class="reason-input" rows="2" placeholder="${lang==='ar'?'اكتب ملاحظة عن اليوم ده...':'Write a note about this day...'}">${curNote}</textarea>
+          <button class="submit-btn" style="margin-top:6px;padding:10px;font-size:13px" onclick="saveNote('${noteKey}')">${lang==='ar'?'حفظ الملاحظة':'Save Note'}</button>
+        </div>
         <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
       </div>
     </div>`;
 }
 
 function setShift(id){DB.shifts[key(curUser().id,yr,mo,selDay)]=id;saveDB();closeModal();render();}
+
+function saveNote(noteKey){
+  const val=document.getElementById('day-note')?.value?.trim()||'';
+  if(!DB.notes) DB.notes={};
+  if(val) DB.notes[noteKey]=val;
+  else delete DB.notes[noteKey];
+  saveDB();
+  // show confirmation
+  const btn=document.querySelector('#modal-root .submit-btn');
+  if(btn){btn.textContent='✅';btn.style.background='var(--green)';setTimeout(()=>closeModal(),600);}
+  render();
+}
 
 function openDetail(){
   const u=curUser();
