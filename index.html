@@ -58,7 +58,7 @@ body.en .page.active{transform:translateX(0);}
 
 /* BOTTOM NAV */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;width:100%;background:rgba(21,23,27,0.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--border2);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom);border-radius:18px 18px 0 0;overflow:hidden;}
-.nav-indicator{position:absolute;top:0;height:3px;width:25%;background:var(--blue);border-radius:0 0 3px 3px;transition:transform 0.3s cubic-bezier(.2,.8,.2,1);}
+.nav-indicator{position:absolute;top:0;height:3px;width:20%;background:var(--blue);border-radius:0 0 3px 3px;transition:transform 0.3s cubic-bezier(.2,.8,.2,1);}
 
 /* ANALYTICS */
 .an-section{margin-bottom:14px;}
@@ -257,6 +257,49 @@ body.en .modal{margin:0;}
 .adv-amount{font-size:14px;font-weight:700;color:var(--red);}
 .adv-note{font-size:11px;color:var(--text3);margin-top:2px;}
 .adv-del{background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:4px;}
+
+/* SETTINGS PAGE */
+.settings-section{margin:0 12px 18px;}
+.settings-section-title{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:0.9px;text-transform:uppercase;margin-bottom:8px;padding:0 2px;}
+.settings-card{background:var(--surface);border-radius:var(--radius);border:0.5px solid var(--border);overflow:hidden;}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:0.5px solid var(--border);cursor:default;}
+.settings-row:last-child{border-bottom:none;}
+.settings-row.tappable{cursor:pointer;transition:background 0.15s;}
+.settings-row.tappable:active{background:var(--surface2);}
+.settings-row-left{display:flex;flex-direction:column;gap:2px;flex:1;}
+.settings-row-label{font-size:14px;font-weight:500;color:var(--text);}
+.settings-row-sub{font-size:11px;color:var(--text3);}
+.settings-row-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.settings-val{font-size:14px;font-weight:600;color:var(--blue);}
+.settings-chevron{width:14px;height:14px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.settings-input-inline{background:transparent;border:none;color:var(--blue);font-family:inherit;font-size:14px;font-weight:600;text-align:left;width:80px;padding:0;}
+body.en .settings-input-inline{text-align:right;}
+.settings-input-inline:focus{outline:none;color:var(--text);}
+.settings-badge{font-size:11px;padding:3px 8px;border-radius:8px;font-weight:600;}
+.settings-badge.green{background:var(--green-dim);color:var(--green);}
+.settings-badge.amber{background:var(--amber-dim);color:var(--amber);}
+.settings-badge.blue{background:var(--blue-dim);color:var(--blue);}
+.settings-toggle{width:44px;height:26px;background:var(--surface3);border-radius:13px;position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;border:none;}
+.settings-toggle.on{background:var(--blue);}
+.settings-toggle::after{content:'';position:absolute;width:20px;height:20px;background:#fff;border-radius:50%;top:3px;left:3px;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);}
+.settings-toggle.on::after{transform:translateX(18px);}
+.shift-type-row{display:flex;align-items:center;padding:13px 16px;gap:12px;border-bottom:0.5px solid var(--border);}
+.shift-type-row:last-child{border-bottom:none;}
+.shift-color-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.shift-type-info{flex:1;}
+.shift-type-name{font-size:13px;font-weight:600;color:var(--text);}
+.shift-type-formula{font-size:11px;color:var(--text3);margin-top:1px;}
+.shift-type-val{font-size:13px;font-weight:700;color:var(--green);}
+.backup-card{margin:0 12px 12px;background:var(--surface);border-radius:var(--radius);border:0.5px solid var(--border);padding:16px;}
+.backup-card h4{font-size:14px;font-weight:600;margin-bottom:4px;}
+.backup-card p{font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5;}
+.backup-btns{display:flex;gap:8px;}
+.backup-btn{flex:1;padding:11px;border-radius:var(--radius-sm);border:none;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s;}
+.backup-btn:active{transform:scale(0.96);}
+.backup-btn.save{background:var(--blue-dim);color:var(--blue);border:0.5px solid rgba(74,158,255,0.3);}
+.backup-btn.restore{background:var(--surface2);color:var(--text2);border:0.5px solid var(--border2);}
+.backup-btn.danger{background:var(--red-dim);color:var(--red);border:0.5px solid rgba(255,107,107,0.25);}
+.last-backup{font-size:11px;color:var(--text3);text-align:center;margin-top:8px;}
 </style>
 </head>
 <body>
@@ -336,10 +379,6 @@ body.en .modal{margin:0;}
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     <span id="add-user-lbl">إضافة مستخدم</span>
   </button>
-  <div style="display:flex;gap:8px;margin:10px 12px 0">
-    <button onclick="backupDB()" style="flex:1;padding:12px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text2);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">💾 Backup</button>
-    <button onclick="restoreDB()" style="flex:1;padding:12px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text2);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">📂 Restore</button>
-  </div>
 </div>
 
 <!-- ANALYTICS PAGE -->
@@ -356,6 +395,158 @@ body.en .modal{margin:0;}
     </div>
   </div>
   <div id="analytics-content" style="padding:0 12px 12px"></div>
+</div>
+
+<!-- SETTINGS PAGE -->
+<div class="page" id="page-settings">
+  <div class="topbar">
+    <div><h1 id="settings-title">الإعدادات</h1><p id="settings-sub">تخصيص طريقة الحساب</p></div>
+    <div class="topbar-right">
+      <button class="lang-btn" onclick="toggleLang()">EN</button>
+    </div>
+  </div>
+
+  <!-- SALARY CALC METHOD -->
+  <div class="settings-section">
+    <div class="settings-section-title" id="stg-s1">طريقة حساب المرتب</div>
+    <div class="settings-card">
+      <div class="settings-row tappable" onclick="openCalcMethodPicker()">
+        <div class="settings-row-left">
+          <span class="settings-row-label" id="stg-calcmethod-lbl">أساس الحساب</span>
+          <span class="settings-row-sub" id="stg-calcmethod-sub">كيف بيتحسب الـ daily و hourly</span>
+        </div>
+        <div class="settings-row-right">
+          <span class="settings-val" id="stg-calcmethod-val">30 يوم</span>
+          <svg class="settings-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+      <div class="settings-row tappable" onclick="openOffDayCountPicker()">
+        <div class="settings-row-left">
+          <span class="settings-row-label" id="stg-offdays-lbl">أيام الإجازة الأسبوعية</span>
+          <span class="settings-row-sub" id="stg-offdays-sub">عدد أيام الراحة في الأسبوع</span>
+        </div>
+        <div class="settings-row-right">
+          <span class="settings-val" id="stg-offdays-val">1 يوم</span>
+          <svg class="settings-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+      <div class="settings-row tappable" onclick="openCurrencyPicker()">
+        <div class="settings-row-left">
+          <span class="settings-row-label" id="stg-currency-lbl">العملة</span>
+          <span class="settings-row-sub" id="stg-currency-sub">الرمز اللي هيظهر في التقارير</span>
+        </div>
+        <div class="settings-row-right">
+          <span class="settings-val" id="stg-currency-val">EGP</span>
+          <svg class="settings-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHIFT TYPES & BONUSES -->
+  <div class="settings-section">
+    <div class="settings-section-title" id="stg-s2">أنواع الشيفتات والزيادات</div>
+    <div class="settings-card" id="stg-shift-types-card">
+      <!-- rendered by JS -->
+    </div>
+    <div style="font-size:11px;color:var(--text3);padding:6px 4px 0;line-height:1.6" id="stg-formula-note">
+      الزيادات بتتحسب على أساس الإعدادات دي — اضغط على أي شيفت عشان تعدله
+    </div>
+  </div>
+
+  <!-- OVERTIME RATE -->
+  <div class="settings-section">
+    <div class="settings-section-title" id="stg-s3">معامل الأوفرتايم</div>
+    <div class="settings-card">
+      <div class="settings-row tappable" onclick="openOvertimePicker()">
+        <div class="settings-row-left">
+          <span class="settings-row-label" id="stg-ot-lbl">معامل ساعات الأوفرتايم</span>
+          <span class="settings-row-sub" id="stg-ot-sub">بيتضرب في الـ hourly عشان يحسب الزيادة</span>
+        </div>
+        <div class="settings-row-right">
+          <span class="settings-val" id="stg-ot-val">× 1.5</span>
+          <svg class="settings-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+      <div class="settings-row tappable" onclick="openOTHoursPicker()">
+        <div class="settings-row-left">
+          <span class="settings-row-label" id="stg-othours-lbl">ساعات أوفرتايم في الشيفت</span>
+          <span class="settings-row-sub" id="stg-othours-sub">عدد الساعات اللي بتتحسب أوفرتايم</span>
+        </div>
+        <div class="settings-row-right">
+          <span class="settings-val" id="stg-othours-val">4 ساعات</span>
+          <svg class="settings-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DISPLAY -->
+  <div class="settings-section">
+    <div class="settings-section-title" id="stg-s4">العرض</div>
+    <div class="settings-card">
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <span class="settings-row-label" id="stg-rounding-lbl">تقريب الأرقام</span>
+          <span class="settings-row-sub" id="stg-rounding-sub">تقريب المبالغ لأقرب رقم صحيح</span>
+        </div>
+        <div class="settings-row-right">
+          <button class="settings-toggle" id="stg-rounding-toggle" onclick="toggleRounding()"></button>
+        </div>
+      </div>
+      <div class="settings-row tappable" onclick="openFirstDayPicker()">
+        <div class="settings-row-left">
+          <span class="settings-row-label" id="stg-firstday-lbl">أول يوم في الأسبوع</span>
+          <span class="settings-row-sub" id="stg-firstday-sub">ترتيب عرض التقويم</span>
+        </div>
+        <div class="settings-row-right">
+          <span class="settings-val" id="stg-firstday-val">الأحد</span>
+          <svg class="settings-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BACKUP & RESTORE -->
+  <div class="settings-section">
+    <div class="settings-section-title" id="stg-s5">النسخ الاحتياطي</div>
+    <div class="backup-card">
+      <h4 id="stg-backup-title">💾 حفظ البيانات</h4>
+      <p id="stg-backup-desc">احفظ كل شيفتاتك وإعداداتك في ملف. لو هتمسح الكاش أو تغير الموبايل، افتح الملف ده وهيرجع كل حاجة.</p>
+      <div class="backup-btns">
+        <button class="backup-btn save" onclick="backupDB()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <span id="stg-save-btn">حفظ نسخة</span>
+        </button>
+        <button class="backup-btn restore" onclick="restoreDB()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 2v6h6"/><path d="M3 13a9 9 0 1 0 3-7.7L3 8"/></svg>
+          <span id="stg-restore-btn">استعادة</span>
+        </button>
+      </div>
+      <div class="last-backup" id="stg-last-backup"></div>
+    </div>
+    <div style="margin:0 12px 12px;">
+      <button class="backup-btn danger" style="width:100%;padding:12px" onclick="confirmClearAll()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        <span id="stg-clear-btn">مسح كل البيانات</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- APP INFO -->
+  <div class="settings-section">
+    <div class="settings-card">
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <span class="settings-row-label">My Shifts</span>
+          <span class="settings-row-sub" id="stg-version">v3.1 — Settings Edition</span>
+        </div>
+        <div class="settings-row-right">
+          <span class="settings-badge blue">⚙️</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <button class="fab" id="fab-btn" onclick="openTodayShift()">+</button>
@@ -377,6 +568,10 @@ body.en .modal{margin:0;}
   <div class="nav-item" id="nav-analytics" onclick="showPage('analytics')">
     <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
     <span id="nav-lbl-analytics">تحليلات</span>
+  </div>
+  <div class="nav-item" id="nav-settings" onclick="showPage('settings')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span id="nav-lbl-settings">الإعدادات</span>
   </div>
 </div>
 </div>
@@ -489,6 +684,24 @@ const COLORS=['#4A9EFF','#4CAF7D','#F5A623','#FF6B6B','#B57BFF','#FF9F43','#26de
 const START=new Date(2026,4,1);
 const DEFAULT_USERS=[{id:'hamza',name:'حمزة',salary:7000,offDay:0,wdStart:14,wdEnd:23,weStart:15,weEnd:24,color:'#4A9EFF'}];
 
+// SETTINGS DEFAULTS
+const DEFAULT_SETTINGS={
+  calcBase:30,          // days basis for daily rate
+  offDaysPerWeek:1,     // number of weekly off days
+  currency:'EGP',
+  overtimeRate:1.5,     // multiplier for OT hours
+  overtimeHours:4,      // OT hours per qualifying shift
+  roundAmounts:true,
+  firstDayOfWeek:0,     // 0=Sun, 6=Sat
+  // shift bonus formulas: 'none','daily','offnight','offfull','custom'
+  shiftBonuses:{
+    night:   {formula:'none',   customVal:0},
+    full:    {formula:'daily',  customVal:0},
+    'off-night':{formula:'daily',  customVal:0},
+    'off-full': {formula:'offfull',customVal:0}
+  }
+};
+
 function loadDB(){try{return JSON.parse(localStorage.getItem('myshifts_v3')||'null');}catch(e){return null;}}
 function saveDB(){localStorage.setItem('myshifts_v3',JSON.stringify(DB));}
 
@@ -498,6 +711,29 @@ if(!DB.shifts) DB.shifts={};
 if(!DB.locks) DB.locks={};
 if(!DB.advances) DB.advances={};
 if(!DB.notes) DB.notes={};
+if(!DB.settings) DB.settings={...DEFAULT_SETTINGS};
+// merge any missing keys from defaults
+DB.settings={...DEFAULT_SETTINGS,...DB.settings};
+if(!DB.settings.shiftBonuses) DB.settings.shiftBonuses={...DEFAULT_SETTINGS.shiftBonuses};
+
+function getSettings(){return DB.settings;}
+function saveSettings(){saveDB();}
+
+function calcBonusForShift(u,shiftId){
+  const s=getSettings();
+  const daily=u.salary/s.calcBase;
+  const wdHours=u.wdEnd-u.wdStart;
+  const hourly=u.salary/(s.calcBase*wdHours);
+  const otBonus=s.overtimeHours*hourly*s.overtimeRate;
+  const bf=s.shiftBonuses[shiftId];
+  if(!bf) return 0;
+  if(bf.formula==='none') return 0;
+  if(bf.formula==='daily') return daily;
+  if(bf.formula==='offnight') return daily;
+  if(bf.formula==='offfull') return daily+otBonus;
+  if(bf.formula==='custom') return bf.customVal||0;
+  return 0;
+}
 
 let currentUser=DB.users[0].id;
 let yr=2026,mo=4,leaveYr=2026,leaveMo=4;
@@ -515,18 +751,26 @@ function avatarLetter(name){return name.charAt(0);}
 function colorForUser(u){return u.color||COLORS[0];}
 
 function userCalc(u){
-  const daily=u.salary/30;
+  const s=getSettings();
+  const daily=u.salary/s.calcBase;
   const wdHours=u.wdEnd-u.wdStart;
-  const hourly=u.salary/(30*wdHours);
-  return {daily,hourly,wdHours,fullBonus:daily,offNightBonus:daily,offFullBonus:daily+(4*hourly*1.5)};
+  const hourly=u.salary/(s.calcBase*wdHours);
+  const otBonus=s.overtimeHours*hourly*s.overtimeRate;
+  return {
+    daily,hourly,wdHours,
+    fullBonus:calcBonusForShift(u,'full'),
+    offNightBonus:calcBonusForShift(u,'off-night'),
+    offFullBonus:calcBonusForShift(u,'off-full')
+  };
 }
 
 function getBonus(u,shiftId){
-  const c=userCalc(u);
-  if(shiftId==='full') return c.fullBonus;
-  if(shiftId==='off-night') return c.offNightBonus;
-  if(shiftId==='off-full') return c.offFullBonus;
-  if(shiftId==='leave') return -c.daily;
+  const s=getSettings();
+  const daily=u.salary/s.calcBase;
+  if(shiftId==='full') return calcBonusForShift(u,'full');
+  if(shiftId==='off-night') return calcBonusForShift(u,'off-night');
+  if(shiftId==='off-full') return calcBonusForShift(u,'off-full');
+  if(shiftId==='leave') return -daily;
   return 0;
 }
 
@@ -557,6 +801,7 @@ function showPage(p){
   if(p==='users') renderUsers();
   if(p==='calendar') render();
   if(p==='analytics') setTimeout(()=>renderAnalytics(),0);
+  if(p==='settings') renderSettings();
 }
 
 function updateTopbars(){
@@ -1254,6 +1499,20 @@ function renderAnalytics(){
 }
 
 
+// ANIMATE number value
+function animateValue(el,end,duration=500){
+  if(!el) return;
+  const start=parseFloat(el.textContent.replace(/[^0-9.-]/g,''))||0;
+  const startTime=performance.now();
+  function step(now){
+    const p=Math.min((now-startTime)/duration,1);
+    const ease=1-Math.pow(1-p,3);
+    el.textContent=Math.round(ease*(end-start)+start);
+    if(p<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
 let currentPage='calendar';
 let undoStack=null,toastTimer=null;
 updateTopbars();render();
@@ -1330,7 +1589,7 @@ function showToastMsg(msg){
 setTimeout(requestNotifPermission,3000);
 
 // NAV INDICATOR
-const NAV_ORDER=['calendar','history','leave','analytics'];
+const NAV_ORDER=['calendar','history','leave','analytics','settings'];
 function moveIndicator(idx){
   const ind=document.getElementById('nav-indicator');
   if(!ind) return;
@@ -1347,11 +1606,11 @@ window.showPage=function(p){
   moveIndicator(NAV_ORDER.indexOf(p));
   const fab=document.getElementById('fab-btn');
   if(!fab) return;
-  const fabIcons={calendar:'+',history:'📄',leave:'✓',analytics:'',users:'+'};
+  const fabIcons={calendar:'+',history:'📄',leave:'✓',analytics:'',users:'+',settings:''};
   const fabActions={calendar:'openTodayShift()',history:'exportCurrentMonth()',leave:'applyLeave()',users:'openAddUser()'};
   fab.innerHTML=fabIcons[p]||'+';
   fab.setAttribute('onclick',fabActions[p]||'openTodayShift()');
-  fab.classList.toggle('hide',p==='users'||p==='analytics');
+  fab.classList.toggle('hide',p==='users'||p==='analytics'||p==='settings');
 };
 
 // QUICK TAP CYCLING (tap = next shift, no modal)
@@ -1454,18 +1713,398 @@ function restoreDB(){
   input.click();
 }
 
-// ANIMATE number value
-function animateValue(el,end,duration=500){
-  if(!el) return;
-  const start=parseFloat(el.textContent.replace(/[^0-9.-]/g,''))||0;
-  const startTime=performance.now();
-  function step(now){
-    const p=Math.min((now-startTime)/duration,1);
-    const ease=1-Math.pow(1-p,3);
-    el.textContent=Math.round(ease*(end-start)+start);
-    if(p<1) requestAnimationFrame(step);
+// ========================
+// SETTINGS PAGE
+// ========================
+
+const CALC_BASE_OPTIONS=[
+  {val:26,label:'26 يوم (بدون جمعة)',labelEn:'26 days (excl. Friday)'},
+  {val:30,label:'30 يوم (شهر كامل)',labelEn:'30 days (full month)'},
+  {val:22,label:'22 يوم (أيام عمل)',labelEn:'22 working days'},
+];
+
+const CURRENCY_OPTIONS=['EGP','SAR','AED','USD','EUR','ج'];
+
+const FORMULA_LABELS={
+  none:{ar:'بدون زيادة',en:'No bonus'},
+  daily:{ar:'يومية كاملة',en:'Full daily rate'},
+  offnight:{ar:'يومية كاملة',en:'Full daily rate'},
+  offfull:{ar:'يومية + أوفرتايم',en:'Daily + overtime'},
+  custom:{ar:'مبلغ ثابت',en:'Fixed amount'},
+};
+
+const SHIFT_META={
+  night:  {color:'var(--blue)',  nameAr:'شيفت بليل (عادي)',   nameEn:'Night (regular)'},
+  full:   {color:'var(--green)', nameAr:'صبح + بليل (عادي)', nameEn:'Full day (regular)'},
+  'off-night':{color:'var(--amber)',nameAr:'شيفت بليل (إجازة)', nameEn:'Night (day off)'},
+  'off-full': {color:'var(--red)',  nameAr:'صبح + بليل (إجازة)',nameEn:'Full day (day off)'},
+};
+
+function renderSettings(){
+  const isAr=lang==='ar';
+  const s=getSettings();
+  // calc method
+  const cb=CALC_BASE_OPTIONS.find(o=>o.val===s.calcBase)||CALC_BASE_OPTIONS[1];
+  document.getElementById('stg-calcmethod-val').textContent=isAr?cb.label:cb.labelEn;
+  // off days
+  document.getElementById('stg-offdays-val').textContent=s.offDaysPerWeek+(isAr?' يوم':' day(s)');
+  // currency
+  document.getElementById('stg-currency-val').textContent=s.currency;
+  // OT
+  document.getElementById('stg-ot-val').textContent='× '+s.overtimeRate;
+  document.getElementById('stg-othours-val').textContent=s.overtimeHours+(isAr?' ساعات':' hrs');
+  // rounding
+  const tog=document.getElementById('stg-rounding-toggle');
+  if(tog) tog.classList.toggle('on',s.roundAmounts);
+  // first day
+  document.getElementById('stg-firstday-val').textContent=T[lang].days[s.firstDayOfWeek];
+  // last backup
+  const lb=localStorage.getItem('myshifts_last_backup');
+  const lbEl=document.getElementById('stg-last-backup');
+  if(lbEl) lbEl.textContent=lb?(isAr?'آخر نسخة: ':'Last backup: ')+lb:'';
+  // shift types card
+  const card=document.getElementById('stg-shift-types-card');
+  if(card){
+    const u=DB.users[0];
+    card.innerHTML=Object.entries(SHIFT_META).map(([id,meta])=>{
+      const bf=s.shiftBonuses[id]||{formula:'none',customVal:0};
+      const bonusAmt=calcBonusForShift(u,id);
+      const formulaLbl=isAr?(FORMULA_LABELS[bf.formula]?.ar||bf.formula):(FORMULA_LABELS[bf.formula]?.en||bf.formula);
+      const amtStr=bonusAmt>0?'+'+Math.round(bonusAmt)+(isAr?' ج':' '+s.currency):(isAr?'بدون':'None');
+      return `<div class="shift-type-row" onclick="openShiftBonusEditor('${id}')">
+        <div class="shift-color-dot" style="background:${meta.color}"></div>
+        <div class="shift-type-info">
+          <div class="shift-type-name">${isAr?meta.nameAr:meta.nameEn}</div>
+          <div class="shift-type-formula">${formulaLbl}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="shift-type-val" style="color:${bonusAmt>0?'var(--green)':'var(--text3)'}">${amtStr}</span>
+          <svg class="settings-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>`;
+    }).join('');
   }
-  requestAnimationFrame(step);
+  // update UI labels for current lang
+  if(isAr){
+    const el=document.getElementById('settings-sub');if(el)el.textContent='تخصيص طريقة الحساب';
+  } else {
+    const el=document.getElementById('settings-sub');if(el)el.textContent='Customize calculation method';
+    document.getElementById('stg-s1').textContent='Salary Calculation';
+    document.getElementById('stg-s2').textContent='Shift Types & Bonuses';
+    document.getElementById('stg-s3').textContent='Overtime Rate';
+    document.getElementById('stg-s4').textContent='Display';
+    document.getElementById('stg-s5').textContent='Backup & Restore';
+    document.getElementById('stg-calcmethod-lbl').textContent='Calculation Basis';
+    document.getElementById('stg-calcmethod-sub').textContent='How daily & hourly rates are calculated';
+    document.getElementById('stg-offdays-lbl').textContent='Weekly Off Days';
+    document.getElementById('stg-offdays-sub').textContent='Number of rest days per week';
+    document.getElementById('stg-currency-lbl').textContent='Currency';
+    document.getElementById('stg-currency-sub').textContent='Symbol shown in reports';
+    document.getElementById('stg-ot-lbl').textContent='Overtime Multiplier';
+    document.getElementById('stg-ot-sub').textContent='Multiplied by hourly rate for overtime';
+    document.getElementById('stg-othours-lbl').textContent='Overtime Hours per Shift';
+    document.getElementById('stg-othours-sub').textContent='Hours counted as overtime in qualifying shifts';
+    document.getElementById('stg-rounding-lbl').textContent='Round Amounts';
+    document.getElementById('stg-rounding-sub').textContent='Round monetary values to whole numbers';
+    document.getElementById('stg-firstday-lbl').textContent='First Day of Week';
+    document.getElementById('stg-firstday-sub').textContent='Calendar display order';
+    document.getElementById('stg-formula-note').textContent='Bonuses are calculated based on these settings — tap any shift to edit';
+    document.getElementById('stg-backup-title').textContent='💾 Save Data';
+    document.getElementById('stg-backup-desc').textContent='Save all your shifts and settings to a file. If you clear cache or change devices, open this file to restore everything.';
+    document.getElementById('stg-save-btn').textContent='Save Backup';
+    document.getElementById('stg-restore-btn').textContent='Restore';
+    document.getElementById('stg-clear-btn').textContent='Clear All Data';
+  }
+}
+
+function openCalcMethodPicker(){
+  const isAr=lang==='ar';
+  const s=getSettings();
+  document.getElementById('modal-root').innerHTML=`
+    <div class="overlay" onclick="closeModal(event)">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <h3>${isAr?'أساس حساب المرتب':'Salary Calculation Basis'}</h3>
+        ${CALC_BASE_OPTIONS.map(o=>`
+          <button class="shift-btn ${s.calcBase===o.val?'active':''}" onclick="setCalcBase(${o.val})">
+            <span>${isAr?o.label:o.labelEn}</span>
+            ${s.calcBase===o.val?'<span style="color:var(--blue)">✓</span>':''}
+          </button>`).join('')}
+        <div style="font-size:12px;color:var(--text3);margin-top:8px;line-height:1.6">
+          ${isAr?'ده بيأثر على اليومية وبالتالي على الزيادة والخصومات':'This affects daily rate and therefore bonuses & deductions'}
+        </div>
+        <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
+      </div>
+    </div>`;
+}
+
+function setCalcBase(val){
+  DB.settings.calcBase=val;saveSettings();closeModal();renderSettings();render();
+}
+
+function openOffDayCountPicker(){
+  const isAr=lang==='ar';
+  const s=getSettings();
+  document.getElementById('modal-root').innerHTML=`
+    <div class="overlay" onclick="closeModal(event)">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <h3>${isAr?'أيام الإجازة الأسبوعية':'Weekly Off Days'}</h3>
+        ${[1,2].map(n=>`
+          <button class="shift-btn ${s.offDaysPerWeek===n?'active':''}" onclick="setOffDayCount(${n})">
+            <span>${n} ${isAr?'يوم':'day(s)'}</span>
+            ${s.offDaysPerWeek===n?'<span style="color:var(--blue)">✓</span>':''}
+          </button>`).join('')}
+        <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
+      </div>
+    </div>`;
+}
+
+function setOffDayCount(n){
+  DB.settings.offDaysPerWeek=n;saveSettings();closeModal();renderSettings();
+}
+
+function openCurrencyPicker(){
+  const isAr=lang==='ar';
+  const s=getSettings();
+  document.getElementById('modal-root').innerHTML=`
+    <div class="overlay" onclick="closeModal(event)">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <h3>${isAr?'العملة':'Currency'}</h3>
+        ${CURRENCY_OPTIONS.map(c=>`
+          <button class="shift-btn ${s.currency===c?'active':''}" onclick="setCurrency('${c}')">
+            <span>${c}</span>
+            ${s.currency===c?'<span style="color:var(--blue)">✓</span>':''}
+          </button>`).join('')}
+        <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
+      </div>
+    </div>`;
+}
+
+function setCurrency(c){
+  DB.settings.currency=c;saveSettings();closeModal();renderSettings();
+}
+
+function openOvertimePicker(){
+  const isAr=lang==='ar';
+  const s=getSettings();
+  document.getElementById('modal-root').innerHTML=`
+    <div class="overlay" onclick="closeModal(event)">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <h3>${isAr?'معامل الأوفرتايم':'Overtime Multiplier'}</h3>
+        ${[1.0,1.25,1.5,1.75,2.0].map(r=>`
+          <button class="shift-btn ${s.overtimeRate===r?'active':''}" onclick="setOvertimeRate(${r})">
+            <span>× ${r}</span>
+            ${s.overtimeRate===r?'<span style="color:var(--blue)">✓</span>':''}
+          </button>`).join('')}
+        <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
+      </div>
+    </div>`;
+}
+
+function setOvertimeRate(r){
+  DB.settings.overtimeRate=r;saveSettings();closeModal();renderSettings();
+}
+
+function openOTHoursPicker(){
+  const isAr=lang==='ar';
+  const s=getSettings();
+  document.getElementById('modal-root').innerHTML=`
+    <div class="overlay" onclick="closeModal(event)">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <h3>${isAr?'ساعات الأوفرتايم في الشيفت':'Overtime Hours per Shift'}</h3>
+        ${[2,3,4,5,6,8].map(h=>`
+          <button class="shift-btn ${s.overtimeHours===h?'active':''}" onclick="setOTHours(${h})">
+            <span>${h} ${isAr?'ساعات':'hours'}</span>
+            ${s.overtimeHours===h?'<span style="color:var(--blue)">✓</span>':''}
+          </button>`).join('')}
+        <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
+      </div>
+    </div>`;
+}
+
+function setOTHours(h){
+  DB.settings.overtimeHours=h;saveSettings();closeModal();renderSettings();
+}
+
+function toggleRounding(){
+  DB.settings.roundAmounts=!DB.settings.roundAmounts;
+  saveSettings();renderSettings();
+}
+
+function openFirstDayPicker(){
+  const isAr=lang==='ar';
+  const s=getSettings();
+  document.getElementById('modal-root').innerHTML=`
+    <div class="overlay" onclick="closeModal(event)">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <h3>${isAr?'أول يوم في الأسبوع':'First Day of Week'}</h3>
+        ${[0,1,6].map(d=>`
+          <button class="shift-btn ${s.firstDayOfWeek===d?'active':''}" onclick="setFirstDay(${d})">
+            <span>${T[lang].days[d]}</span>
+            ${s.firstDayOfWeek===d?'<span style="color:var(--blue)">✓</span>':''}
+          </button>`).join('')}
+        <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
+      </div>
+    </div>`;
+}
+
+function setFirstDay(d){
+  DB.settings.firstDayOfWeek=d;saveSettings();closeModal();renderSettings();
+}
+
+function openShiftBonusEditor(shiftId){
+  const isAr=lang==='ar';
+  const s=getSettings();
+  const meta=SHIFT_META[shiftId];
+  const bf=s.shiftBonuses[shiftId]||{formula:'none',customVal:0};
+  const formulas=['none','daily','offfull','custom'];
+  document.getElementById('modal-root').innerHTML=`
+    <div class="overlay" onclick="closeModal(event)">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <h3 style="display:flex;align-items:center;gap:8px">
+          <span style="width:10px;height:10px;border-radius:50%;background:${meta.color};display:inline-block"></span>
+          ${isAr?meta.nameAr:meta.nameEn}
+        </h3>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px">${isAr?'اختار طريقة حساب الزيادة لهذا النوع:':'Choose how the bonus is calculated for this shift type:'}</div>
+        ${formulas.map(f=>`
+          <button class="shift-btn ${bf.formula===f?'active':''}" onclick="setShiftFormula('${shiftId}','${f}')">
+            <span>${isAr?(FORMULA_LABELS[f]?.ar||f):(FORMULA_LABELS[f]?.en||f)}</span>
+            ${bf.formula===f?'<span style="color:var(--blue)">✓</span>':''}
+          </button>`).join('')}
+        ${bf.formula==='custom'?`
+          <div style="margin-top:8px">
+            <label class="form-label">${isAr?'المبلغ الثابت:':'Fixed amount:'}</label>
+            <input class="form-input" id="custom-bonus-val" type="number" value="${bf.customVal||0}" placeholder="0">
+            <button class="submit-btn" style="margin-top:8px" onclick="saveCustomBonus('${shiftId}')">${isAr?'حفظ':'Save'}</button>
+          </div>`:''}
+        <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
+      </div>
+    </div>`;
+}
+
+function setShiftFormula(shiftId,formula){
+  DB.settings.shiftBonuses[shiftId]={...DB.settings.shiftBonuses[shiftId],formula};
+  saveSettings();
+  if(formula==='custom'){openShiftBonusEditor(shiftId);return;}
+  closeModal();renderSettings();render();
+}
+
+function saveCustomBonus(shiftId){
+  const val=parseFloat(document.getElementById('custom-bonus-val')?.value)||0;
+  DB.settings.shiftBonuses[shiftId]={formula:'custom',customVal:val};
+  saveSettings();closeModal();renderSettings();render();
+}
+
+// ========================
+// IMPROVED BACKUP & RESTORE
+// ========================
+
+function backupDB(){
+  const isAr=lang==='ar';
+  const now=new Date();
+  const dateStr=now.toISOString().split('T')[0];
+  const timeStr=now.toTimeString().split(' ')[0].slice(0,5);
+  const backupData={
+    ...DB,
+    _meta:{
+      version:'3.1',
+      exportedAt:now.toISOString(),
+      usersCount:DB.users.length,
+      shiftsCount:Object.keys(DB.shifts).length,
+    }
+  };
+  const blob=new Blob([JSON.stringify(backupData,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`myshifts_backup_${dateStr}.json`;
+  a.click();
+  localStorage.setItem('myshifts_last_backup',`${dateStr} ${timeStr}`);
+  renderSettings();
+  showToastMsg(isAr?`✅ تم الحفظ — ${dateStr}`:`✅ Saved — ${dateStr}`);
+}
+
+function restoreDB(){
+  const isAr=lang==='ar';
+  const input=document.createElement('input');
+  input.type='file';input.accept='.json';
+  input.onchange=e=>{
+    const file=e.target.files[0];
+    if(!file) return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      try{
+        const restored=JSON.parse(ev.target.result);
+        if(!restored.users||!restored.shifts) throw new Error('missing keys');
+        // show confirmation modal
+        const meta=restored._meta||{};
+        const usersCount=restored.users?.length||0;
+        const shiftsCount=Object.keys(restored.shifts||{}).length;
+        const exportDate=meta.exportedAt?new Date(meta.exportedAt).toLocaleDateString():'?';
+        document.getElementById('modal-root').innerHTML=`
+          <div class="overlay">
+            <div class="modal" onclick="event.stopPropagation()">
+              <div class="modal-handle"></div>
+              <h3>${isAr?'استعادة البيانات؟':'Restore Data?'}</h3>
+              <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px">
+                <div style="font-size:13px;color:var(--text2);line-height:2">
+                  <div>👤 ${isAr?'مستخدمون':'Users'}: <b style="color:var(--text)">${usersCount}</b></div>
+                  <div>📅 ${isAr?'شيفتات':'Shifts'}: <b style="color:var(--text)">${shiftsCount}</b></div>
+                  <div>📅 ${isAr?'تاريخ النسخة':'Backup date'}: <b style="color:var(--text)">${exportDate}</b></div>
+                </div>
+              </div>
+              <div style="font-size:12px;color:var(--red);margin-bottom:14px;line-height:1.6">
+                ⚠️ ${isAr?'هيستبدل البيانات الحالية بالكامل — مش هيرجع':'This will replace all current data — cannot be undone'}
+              </div>
+              <button class="submit-btn" id="restore-confirm-btn">${isAr?'✅ استعادة':'✅ Restore'}</button>
+              <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
+            </div>
+          </div>`;
+        document.getElementById('restore-confirm-btn').onclick=()=>{
+          Object.assign(DB,restored);
+          if(!DB.settings) DB.settings={...DEFAULT_SETTINGS};
+          DB.settings={...DEFAULT_SETTINGS,...DB.settings};
+          saveDB();
+          currentUser=DB.users[0].id;
+          closeModal();
+          render();renderHistory();renderUsers();renderSettings();updateTopbars();
+          showToastMsg(isAr?'✅ تم الاستعادة':'✅ Data restored');
+        };
+      }catch(err){
+        closeModal();
+        showToastMsg(isAr?'❌ الملف غلط أو تالف':'❌ Invalid or corrupted file');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function confirmClearAll(){
+  const isAr=lang==='ar';
+  document.getElementById('modal-root').innerHTML=`
+    <div class="overlay">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <h3 style="color:var(--red)">${isAr?'⚠️ مسح كل البيانات':'⚠️ Clear All Data'}</h3>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.8">
+          ${isAr?'ده هيمسح كل الشيفتات والمستخدمين والإعدادات — مش هيرجع تاني! عمل backup الأول.':'This will erase all shifts, users, and settings — cannot be undone! Make a backup first.'}
+        </div>
+        <button class="delete-btn" onclick="clearAllData()">${isAr?'نعم، امسح كل حاجة':'Yes, clear everything'}</button>
+        <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
+      </div>
+    </div>`;
+}
+
+function clearAllData(){
+  localStorage.removeItem('myshifts_v3');
+  localStorage.removeItem('myshifts_last_backup');
+  location.reload();
 }
 
 </script>
