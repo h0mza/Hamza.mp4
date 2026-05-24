@@ -205,6 +205,7 @@ input,textarea,select{-webkit-user-select:text;user-select:text;}
 .leave-day.empty{cursor:default;pointer-events:none;}
 .leave-day.selected{background:var(--purple-dim);border-color:rgba(181,123,255,0.4);}
 .leave-day.has-shift{background:var(--green-dim);border-color:rgba(76,175,125,0.3);cursor:not-allowed;}
+.leave-day.registered-leave{background:rgba(181,123,255,0.12);border-color:rgba(181,123,255,0.35);cursor:pointer;}
 .leave-day.off-day-l{background:rgba(245,166,35,0.06);}
 .leave-day-num{font-size:12px;font-weight:600;color:var(--text);}
 .leave-day-num.muted{color:var(--text3);}
@@ -1131,6 +1132,7 @@ function renderHistory(){
         ${adv>0?`<div class="stat-row"><span class="stat-label">${t('advance')}</span><span class="stat-val red">-${adv.toFixed(0)}</span></div><div class="stat-row"><span class="stat-label">${t('netAfterH')}</span><span class="stat-val ${net>=u.salary?'green':'red'}">${net.toFixed(0)}</span></div>`:''}
         <div class="action-row">
           <button class="act-btn export" onclick="exportMonth('${u.id}','${mk}',event)">${t('exportTxt')}</button>
+          <button class="act-btn" style="background:var(--amber-dim);color:var(--amber);border:0.5px solid rgba(245,166,35,0.3)" onclick="openMonthNotes('${u.id}','${mk}',event)">📝 ${lang==='ar'?'ملاحظات':'Notes'}</button>
           <button class="act-btn ${locked?'unlock-btn':'lock-btn'}" onclick="toggleLock('${u.id}','${mk}',event)">${locked?t('unlockMonth'):t('lockMonth')}</button>
         </div>
       </div>
@@ -1139,6 +1141,49 @@ function renderHistory(){
 }
 
 function toggleHistory(mk){document.getElementById('hist-'+mk).classList.toggle('open');}
+
+function openMonthNotes(uid,mk,e){
+  e.stopPropagation();
+  const u=getUser(uid);
+  const [y,m]=mk.split('-');
+  const mi=parseInt(m)-1;
+  const prefix=`${uid}|${y}-${m}-`;
+  const isAr=lang==='ar';
+
+  // Gather all notes for this month
+  const noteEntries=[];
+  Object.keys(DB.notes||{}).forEach(nk=>{
+    if(!nk.startsWith(`note|${prefix}`)) return;
+    const datePart=nk.replace('note|','').split('|')[1];
+    const d=parseInt(datePart.split('-')[2]);
+    const shiftKey=`${uid}|${datePart}`;
+    const shift=DB.shifts[shiftKey]||'none';
+    const dt=new Date(parseInt(y),mi,d);
+    noteEntries.push({d,dayName:T[lang].days[dt.getDay()],shift,note:DB.notes[nk]});
+  });
+  noteEntries.sort((a,b)=>a.d-b.d);
+
+  const rows=noteEntries.length===0
+    ?`<div class="empty-msg"><div style="font-size:32px;margin-bottom:8px">📝</div>${isAr?'مفيش ملاحظات الشهر ده':'No notes this month'}</div>`
+    :noteEntries.map(n=>`
+      <div class="detail-row">
+        <div style="flex:1">
+          <div class="detail-date">${n.dayName} ${n.d} ${T[lang].months[mi]}</div>
+          <div class="detail-type">${getShiftLabel(n.shift)}</div>
+          <div style="font-size:13px;color:var(--text);margin-top:5px;line-height:1.5;background:var(--surface2);padding:8px 10px;border-radius:var(--radius-sm)">${n.note}</div>
+        </div>
+      </div>`).join('');
+
+  document.getElementById('modal-root').innerHTML=`
+    <div class="overlay" onclick="closeModal(event)">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <h3>📝 ${isAr?'ملاحظات':'Notes'} — ${T[lang].months[mi]} ${y}</h3>
+        ${rows}
+        <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
+      </div>
+    </div>`;
+}
 
 function toggleLock(uid,mk,e){
   e.stopPropagation();
@@ -1195,13 +1240,61 @@ function renderLeaveCalendar(){
     const dkey=`${leaveYr}-${leaveMo}-${d}`;
     const isSelected=leaveSelected.has(dkey);
     const hasShift=shift!=='none'&&shift!=='leave';
-    cell.className='leave-day'+(offDay?' off-day-l':'')+(isSelected?' selected':'')+(hasShift?' has-shift':'');
+    const isRegisteredLeave=shift==='leave';
+    cell.className='leave-day'+(offDay?' off-day-l':'')+(isSelected?' selected':'')+(hasShift?' has-shift':'')+(isRegisteredLeave?' registered-leave':'');
     const num=document.createElement('div');
     num.className='leave-day-num'+(before?' muted':'');
     num.textContent=d;
     cell.appendChild(num);
-    if(!before&&!hasShift&&!offDay){
-      cell.onclick=()=>{if(isSelected) leaveSelected.delete(dkey); else leaveSelected.add(dkey);renderLeaveCalendar();};
+    // show registered leave indicator
+    if(isRegisteredLeave){
+      const leaveDot=document.createElement('div');
+      leaveDot.className='shift-dot dot-leave';
+      leaveDot.textContent=lang==='ar'?'إجازة':'Leave';
+      cell.appendChild(leaveDot);
+    }
+    const canInteract=!before&&!hasShift&&!offDay;
+    const canNote=!before&&(canInteract||isRegisteredLeave);
+    if(canInteract||isRegisteredLeave){
+      cell.addEventListener('touchstart',()=>{
+        pressTimer=setTimeout(()=>{
+          pressTimer=null;
+          const nk=`note|${key(u.id,leaveYr,leaveMo,d)}`;
+          const curNote=DB.notes?.[nk]||'';
+          const dayName=T[lang].days[new Date(leaveYr,leaveMo,d).getDay()];
+          document.getElementById('modal-root').innerHTML=`
+            <div class="overlay" onclick="closeModal(event)">
+              <div class="modal" onclick="event.stopPropagation()">
+                <div class="modal-handle"></div>
+                <h3>${d} ${T[lang].months[leaveMo]} — ${dayName}</h3>
+                ${isRegisteredLeave?`<div style="margin-bottom:10px"><span class="shift-dot dot-leave">${lang==='ar'?'إجازة مسجلة':'Registered Leave'}</span></div>`:''}
+                <div class="form-label" style="margin-bottom:6px">📝 ${lang==='ar'?'ملاحظة':'Note'}</div>
+                <textarea id="day-note" class="reason-input" rows="3" placeholder="${lang==='ar'?'اكتب ملاحظة...':'Write a note...'}">${curNote}</textarea>
+                <button class="submit-btn" style="margin-top:6px;padding:10px;font-size:13px" onclick="saveNote('${nk}')">${lang==='ar'?'حفظ الملاحظة':'Save Note'}</button>
+                ${isRegisteredLeave?`<button class="delete-btn" onclick="removeLeave('${key(u.id,leaveYr,leaveMo,d)}')">${lang==='ar'?'إلغاء الإجازة':'Remove Leave'}</button>`:''}
+                <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
+              </div>
+            </div>`;
+        },500);
+      },{passive:true});
+      cell.addEventListener('touchend',()=>{
+        if(pressTimer){
+          clearTimeout(pressTimer);pressTimer=null;
+          if(canInteract){
+            if(isSelected) leaveSelected.delete(dkey); else leaveSelected.add(dkey);
+            renderLeaveCalendar();
+          }
+        }
+      },{passive:true});
+      cell.addEventListener('touchcancel',()=>{if(pressTimer){clearTimeout(pressTimer);pressTimer=null;}});
+      cell.addEventListener('contextmenu',e=>e.preventDefault());
+    }
+    // note indicator on leave cells
+    const leaveNoteKey=`note|${key(u.id,leaveYr,leaveMo,d)}`;
+    if(DB.notes?.[leaveNoteKey]){
+      const noteDot=document.createElement('div');
+      noteDot.style.cssText='width:5px;height:5px;border-radius:50%;background:var(--amber);margin-top:1px;flex-shrink:0';
+      cell.appendChild(noteDot);
     }
     grid.appendChild(cell);
   }
@@ -1229,6 +1322,11 @@ function applyLeave(){
     DB.shifts[key(u.id,parseInt(y),parseInt(m),parseInt(d))]='leave';
   });
   saveDB();leaveSelected=new Set();renderLeaveCalendar();render();
+}
+
+function removeLeave(k){
+  delete DB.shifts[k];
+  saveDB();closeModal();renderLeaveCalendar();render();
 }
 
 function changeLeaveMonth(dir){leaveMo+=dir;if(leaveMo>11){leaveMo=0;leaveYr++;}if(leaveMo<0){leaveMo=11;leaveYr--;}leaveSelected=new Set();renderLeaveCalendar();}
@@ -1789,324 +1887,4 @@ function renderSettings(){
     const el=document.getElementById('settings-sub');if(el)el.textContent='تخصيص طريقة الحساب';
   } else {
     const el=document.getElementById('settings-sub');if(el)el.textContent='Customize calculation method';
-    document.getElementById('stg-s1').textContent='Salary Calculation';
-    document.getElementById('stg-s2').textContent='Shift Types & Bonuses';
-    document.getElementById('stg-s3').textContent='Overtime Rate';
-    document.getElementById('stg-s4').textContent='Display';
-    document.getElementById('stg-s5').textContent='Backup & Restore';
-    document.getElementById('stg-calcmethod-lbl').textContent='Calculation Basis';
-    document.getElementById('stg-calcmethod-sub').textContent='How daily & hourly rates are calculated';
-    document.getElementById('stg-offdays-lbl').textContent='Weekly Off Days';
-    document.getElementById('stg-offdays-sub').textContent='Number of rest days per week';
-    document.getElementById('stg-currency-lbl').textContent='Currency';
-    document.getElementById('stg-currency-sub').textContent='Symbol shown in reports';
-    document.getElementById('stg-ot-lbl').textContent='Overtime Multiplier';
-    document.getElementById('stg-ot-sub').textContent='Multiplied by hourly rate for overtime';
-    document.getElementById('stg-othours-lbl').textContent='Overtime Hours per Shift';
-    document.getElementById('stg-othours-sub').textContent='Hours counted as overtime in qualifying shifts';
-    document.getElementById('stg-rounding-lbl').textContent='Round Amounts';
-    document.getElementById('stg-rounding-sub').textContent='Round monetary values to whole numbers';
-    document.getElementById('stg-firstday-lbl').textContent='First Day of Week';
-    document.getElementById('stg-firstday-sub').textContent='Calendar display order';
-    document.getElementById('stg-formula-note').textContent='Bonuses are calculated based on these settings — tap any shift to edit';
-    document.getElementById('stg-backup-title').textContent='💾 Save Data';
-    document.getElementById('stg-backup-desc').textContent='Save all your shifts and settings to a file. If you clear cache or change devices, open this file to restore everything.';
-    document.getElementById('stg-save-btn').textContent='Save Backup';
-    document.getElementById('stg-restore-btn').textContent='Restore';
-    document.getElementById('stg-clear-btn').textContent='Clear All Data';
-  }
-}
-
-function openCalcMethodPicker(){
-  const isAr=lang==='ar';
-  const s=getSettings();
-  document.getElementById('modal-root').innerHTML=`
-    <div class="overlay" onclick="closeModal(event)">
-      <div class="modal" onclick="event.stopPropagation()">
-        <div class="modal-handle"></div>
-        <h3>${isAr?'أساس حساب المرتب':'Salary Calculation Basis'}</h3>
-        ${CALC_BASE_OPTIONS.map(o=>`
-          <button class="shift-btn ${s.calcBase===o.val?'active':''}" onclick="setCalcBase(${o.val})">
-            <span>${isAr?o.label:o.labelEn}</span>
-            ${s.calcBase===o.val?'<span style="color:var(--blue)">✓</span>':''}
-          </button>`).join('')}
-        <div style="font-size:12px;color:var(--text3);margin-top:8px;line-height:1.6">
-          ${isAr?'ده بيأثر على اليومية وبالتالي على الزيادة والخصومات':'This affects daily rate and therefore bonuses & deductions'}
-        </div>
-        <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
-      </div>
-    </div>`;
-}
-
-function setCalcBase(val){
-  DB.settings.calcBase=val;saveSettings();closeModal();renderSettings();render();
-}
-
-function openOffDayCountPicker(){
-  const isAr=lang==='ar';
-  const s=getSettings();
-  document.getElementById('modal-root').innerHTML=`
-    <div class="overlay" onclick="closeModal(event)">
-      <div class="modal" onclick="event.stopPropagation()">
-        <div class="modal-handle"></div>
-        <h3>${isAr?'أيام الإجازة الأسبوعية':'Weekly Off Days'}</h3>
-        ${[1,2].map(n=>`
-          <button class="shift-btn ${s.offDaysPerWeek===n?'active':''}" onclick="setOffDayCount(${n})">
-            <span>${n} ${isAr?'يوم':'day(s)'}</span>
-            ${s.offDaysPerWeek===n?'<span style="color:var(--blue)">✓</span>':''}
-          </button>`).join('')}
-        <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
-      </div>
-    </div>`;
-}
-
-function setOffDayCount(n){
-  DB.settings.offDaysPerWeek=n;saveSettings();closeModal();renderSettings();
-}
-
-function openCurrencyPicker(){
-  const isAr=lang==='ar';
-  const s=getSettings();
-  document.getElementById('modal-root').innerHTML=`
-    <div class="overlay" onclick="closeModal(event)">
-      <div class="modal" onclick="event.stopPropagation()">
-        <div class="modal-handle"></div>
-        <h3>${isAr?'العملة':'Currency'}</h3>
-        ${CURRENCY_OPTIONS.map(c=>`
-          <button class="shift-btn ${s.currency===c?'active':''}" onclick="setCurrency('${c}')">
-            <span>${c}</span>
-            ${s.currency===c?'<span style="color:var(--blue)">✓</span>':''}
-          </button>`).join('')}
-        <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
-      </div>
-    </div>`;
-}
-
-function setCurrency(c){
-  DB.settings.currency=c;saveSettings();closeModal();renderSettings();
-}
-
-function openOvertimePicker(){
-  const isAr=lang==='ar';
-  const s=getSettings();
-  document.getElementById('modal-root').innerHTML=`
-    <div class="overlay" onclick="closeModal(event)">
-      <div class="modal" onclick="event.stopPropagation()">
-        <div class="modal-handle"></div>
-        <h3>${isAr?'معامل الأوفرتايم':'Overtime Multiplier'}</h3>
-        ${[1.0,1.25,1.5,1.75,2.0].map(r=>`
-          <button class="shift-btn ${s.overtimeRate===r?'active':''}" onclick="setOvertimeRate(${r})">
-            <span>× ${r}</span>
-            ${s.overtimeRate===r?'<span style="color:var(--blue)">✓</span>':''}
-          </button>`).join('')}
-        <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
-      </div>
-    </div>`;
-}
-
-function setOvertimeRate(r){
-  DB.settings.overtimeRate=r;saveSettings();closeModal();renderSettings();
-}
-
-function openOTHoursPicker(){
-  const isAr=lang==='ar';
-  const s=getSettings();
-  document.getElementById('modal-root').innerHTML=`
-    <div class="overlay" onclick="closeModal(event)">
-      <div class="modal" onclick="event.stopPropagation()">
-        <div class="modal-handle"></div>
-        <h3>${isAr?'ساعات الأوفرتايم في الشيفت':'Overtime Hours per Shift'}</h3>
-        ${[2,3,4,5,6,8].map(h=>`
-          <button class="shift-btn ${s.overtimeHours===h?'active':''}" onclick="setOTHours(${h})">
-            <span>${h} ${isAr?'ساعات':'hours'}</span>
-            ${s.overtimeHours===h?'<span style="color:var(--blue)">✓</span>':''}
-          </button>`).join('')}
-        <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
-      </div>
-    </div>`;
-}
-
-function setOTHours(h){
-  DB.settings.overtimeHours=h;saveSettings();closeModal();renderSettings();
-}
-
-function toggleRounding(){
-  DB.settings.roundAmounts=!DB.settings.roundAmounts;
-  saveSettings();renderSettings();
-}
-
-function openFirstDayPicker(){
-  const isAr=lang==='ar';
-  const s=getSettings();
-  document.getElementById('modal-root').innerHTML=`
-    <div class="overlay" onclick="closeModal(event)">
-      <div class="modal" onclick="event.stopPropagation()">
-        <div class="modal-handle"></div>
-        <h3>${isAr?'أول يوم في الأسبوع':'First Day of Week'}</h3>
-        ${[0,1,6].map(d=>`
-          <button class="shift-btn ${s.firstDayOfWeek===d?'active':''}" onclick="setFirstDay(${d})">
-            <span>${T[lang].days[d]}</span>
-            ${s.firstDayOfWeek===d?'<span style="color:var(--blue)">✓</span>':''}
-          </button>`).join('')}
-        <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
-      </div>
-    </div>`;
-}
-
-function setFirstDay(d){
-  DB.settings.firstDayOfWeek=d;saveSettings();closeModal();renderSettings();
-}
-
-function openShiftBonusEditor(shiftId){
-  const isAr=lang==='ar';
-  const s=getSettings();
-  const meta=SHIFT_META[shiftId];
-  const bf=s.shiftBonuses[shiftId]||{formula:'none',customVal:0};
-  const formulas=['none','daily','offfull','custom'];
-  document.getElementById('modal-root').innerHTML=`
-    <div class="overlay" onclick="closeModal(event)">
-      <div class="modal" onclick="event.stopPropagation()">
-        <div class="modal-handle"></div>
-        <h3 style="display:flex;align-items:center;gap:8px">
-          <span style="width:10px;height:10px;border-radius:50%;background:${meta.color};display:inline-block"></span>
-          ${isAr?meta.nameAr:meta.nameEn}
-        </h3>
-        <div style="font-size:12px;color:var(--text2);margin-bottom:12px">${isAr?'اختار طريقة حساب الزيادة لهذا النوع:':'Choose how the bonus is calculated for this shift type:'}</div>
-        ${formulas.map(f=>`
-          <button class="shift-btn ${bf.formula===f?'active':''}" onclick="setShiftFormula('${shiftId}','${f}')">
-            <span>${isAr?(FORMULA_LABELS[f]?.ar||f):(FORMULA_LABELS[f]?.en||f)}</span>
-            ${bf.formula===f?'<span style="color:var(--blue)">✓</span>':''}
-          </button>`).join('')}
-        ${bf.formula==='custom'?`
-          <div style="margin-top:8px">
-            <label class="form-label">${isAr?'المبلغ الثابت:':'Fixed amount:'}</label>
-            <input class="form-input" id="custom-bonus-val" type="number" value="${bf.customVal||0}" placeholder="0">
-            <button class="submit-btn" style="margin-top:8px" onclick="saveCustomBonus('${shiftId}')">${isAr?'حفظ':'Save'}</button>
-          </div>`:''}
-        <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
-      </div>
-    </div>`;
-}
-
-function setShiftFormula(shiftId,formula){
-  DB.settings.shiftBonuses[shiftId]={...DB.settings.shiftBonuses[shiftId],formula};
-  saveSettings();
-  if(formula==='custom'){openShiftBonusEditor(shiftId);return;}
-  closeModal();renderSettings();render();
-}
-
-function saveCustomBonus(shiftId){
-  const val=parseFloat(document.getElementById('custom-bonus-val')?.value)||0;
-  DB.settings.shiftBonuses[shiftId]={formula:'custom',customVal:val};
-  saveSettings();closeModal();renderSettings();render();
-}
-
-// ========================
-// IMPROVED BACKUP & RESTORE
-// ========================
-
-function backupDB(){
-  const isAr=lang==='ar';
-  const now=new Date();
-  const dateStr=now.toISOString().split('T')[0];
-  const timeStr=now.toTimeString().split(' ')[0].slice(0,5);
-  const backupData={
-    ...DB,
-    _meta:{
-      version:'3.1',
-      exportedAt:now.toISOString(),
-      usersCount:DB.users.length,
-      shiftsCount:Object.keys(DB.shifts).length,
-    }
-  };
-  const blob=new Blob([JSON.stringify(backupData,null,2)],{type:'application/json'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=`myshifts_backup_${dateStr}.json`;
-  a.click();
-  localStorage.setItem('myshifts_last_backup',`${dateStr} ${timeStr}`);
-  renderSettings();
-  showToastMsg(isAr?`✅ تم الحفظ — ${dateStr}`:`✅ Saved — ${dateStr}`);
-}
-
-function restoreDB(){
-  const isAr=lang==='ar';
-  const input=document.createElement('input');
-  input.type='file';input.accept='.json';
-  input.onchange=e=>{
-    const file=e.target.files[0];
-    if(!file) return;
-    const reader=new FileReader();
-    reader.onload=ev=>{
-      try{
-        const restored=JSON.parse(ev.target.result);
-        if(!restored.users||!restored.shifts) throw new Error('missing keys');
-        // show confirmation modal
-        const meta=restored._meta||{};
-        const usersCount=restored.users?.length||0;
-        const shiftsCount=Object.keys(restored.shifts||{}).length;
-        const exportDate=meta.exportedAt?new Date(meta.exportedAt).toLocaleDateString():'?';
-        document.getElementById('modal-root').innerHTML=`
-          <div class="overlay">
-            <div class="modal" onclick="event.stopPropagation()">
-              <div class="modal-handle"></div>
-              <h3>${isAr?'استعادة البيانات؟':'Restore Data?'}</h3>
-              <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px">
-                <div style="font-size:13px;color:var(--text2);line-height:2">
-                  <div>👤 ${isAr?'مستخدمون':'Users'}: <b style="color:var(--text)">${usersCount}</b></div>
-                  <div>📅 ${isAr?'شيفتات':'Shifts'}: <b style="color:var(--text)">${shiftsCount}</b></div>
-                  <div>📅 ${isAr?'تاريخ النسخة':'Backup date'}: <b style="color:var(--text)">${exportDate}</b></div>
-                </div>
-              </div>
-              <div style="font-size:12px;color:var(--red);margin-bottom:14px;line-height:1.6">
-                ⚠️ ${isAr?'هيستبدل البيانات الحالية بالكامل — مش هيرجع':'This will replace all current data — cannot be undone'}
-              </div>
-              <button class="submit-btn" id="restore-confirm-btn">${isAr?'✅ استعادة':'✅ Restore'}</button>
-              <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
-            </div>
-          </div>`;
-        document.getElementById('restore-confirm-btn').onclick=()=>{
-          Object.assign(DB,restored);
-          if(!DB.settings) DB.settings={...DEFAULT_SETTINGS};
-          DB.settings={...DEFAULT_SETTINGS,...DB.settings};
-          saveDB();
-          currentUser=DB.users[0].id;
-          closeModal();
-          render();renderHistory();renderUsers();renderSettings();updateTopbars();
-          showToastMsg(isAr?'✅ تم الاستعادة':'✅ Data restored');
-        };
-      }catch(err){
-        closeModal();
-        showToastMsg(isAr?'❌ الملف غلط أو تالف':'❌ Invalid or corrupted file');
-      }
-    };
-    reader.readAsText(file);
-  };
-  input.click();
-}
-
-function confirmClearAll(){
-  const isAr=lang==='ar';
-  document.getElementById('modal-root').innerHTML=`
-    <div class="overlay">
-      <div class="modal" onclick="event.stopPropagation()">
-        <div class="modal-handle"></div>
-        <h3 style="color:var(--red)">${isAr?'⚠️ مسح كل البيانات':'⚠️ Clear All Data'}</h3>
-        <div style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.8">
-          ${isAr?'ده هيمسح كل الشيفتات والمستخدمين والإعدادات — مش هيرجع تاني! عمل backup الأول.':'This will erase all shifts, users, and settings — cannot be undone! Make a backup first.'}
-        </div>
-        <button class="delete-btn" onclick="clearAllData()">${isAr?'نعم، امسح كل حاجة':'Yes, clear everything'}</button>
-        <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
-      </div>
-    </div>`;
-}
-
-function clearAllData(){
-  localStorage.removeItem('myshifts_v3');
-  localStorage.removeItem('myshifts_last_backup');
-  location.reload();
-}
-
-</script>
-</body>
-</html>
+    document.getElementById('stg-s1').textContent='Salary
