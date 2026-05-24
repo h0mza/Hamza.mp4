@@ -501,6 +501,15 @@ body.en .settings-input-inline{text-align:right;}
           <button class="settings-toggle" id="stg-rounding-toggle" onclick="toggleRounding()"></button>
         </div>
       </div>
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <span class="settings-row-label" id="stg-confirm-lbl">تأكيد تغيير الشيفت</span>
+          <span class="settings-row-sub" id="stg-confirm-sub">اسأل قبل تغيير شيفت موجود</span>
+        </div>
+        <div class="settings-row-right">
+          <button class="settings-toggle" id="stg-confirm-toggle" onclick="toggleConfirmOnChange()"></button>
+        </div>
+      </div>
       <div class="settings-row tappable" onclick="openFirstDayPicker()">
         <div class="settings-row-left">
           <span class="settings-row-label" id="stg-firstday-lbl">أول يوم في الأسبوع</span>
@@ -508,6 +517,16 @@ body.en .settings-input-inline{text-align:right;}
         </div>
         <div class="settings-row-right">
           <span class="settings-val" id="stg-firstday-val">الأحد</span>
+          <svg class="settings-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+      <div class="settings-row tappable" onclick="openStartDatePicker()">
+        <div class="settings-row-left">
+          <span class="settings-row-label" id="stg-startdate-lbl">تاريخ بداية العمل</span>
+          <span class="settings-row-sub" id="stg-startdate-sub">الأيام قبله مش قابلة للتعديل</span>
+        </div>
+        <div class="settings-row-right">
+          <span class="settings-val" id="stg-startdate-val">—</span>
           <svg class="settings-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
       </div>
@@ -688,7 +707,12 @@ function updateAllLabels(){
 
 // DATA
 const COLORS=['#4A9EFF','#4CAF7D','#F5A623','#FF6B6B','#B57BFF','#FF9F43','#26de81'];
-const START=new Date(2026,4,1);
+// START is now dynamic — read from settings, not hardcoded
+function getStartDate(){
+  const s=DB&&DB.settings&&DB.settings.startDate;
+  if(s){const d=new Date(s);if(!isNaN(d)) return d;}
+  return new Date(2026,4,1); // fallback only if settings broken
+}
 const DEFAULT_USERS=[{id:'hamza',name:'حمزة',salary:7000,offDay:0,wdStart:14,wdEnd:23,weStart:15,weEnd:24,color:'#4A9EFF'}];
 
 // SETTINGS DEFAULTS
@@ -700,6 +724,8 @@ const DEFAULT_SETTINGS={
   overtimeHours:4,      // OT hours per qualifying shift
   roundAmounts:true,
   firstDayOfWeek:0,     // 0=Sun, 6=Sat
+  startDate:'2026-05-01', // employment start date (YYYY-MM-DD)
+  confirmOnChange:true,   // ask before changing an existing shift
   // shift bonus formulas: 'none','daily','offnight','offfull','custom'
   shiftBonuses:{
     night:   {formula:'none',   customVal:0},
@@ -753,7 +779,7 @@ function key(uid,y,m,d){return `${uid}|${y}-${String(m+1).padStart(2,'0')}-${Str
 function monthKey(uid,y,m){return `${uid}|${y}-${String(m+1).padStart(2,'0')}`;}
 function isLocked(uid,y,m){return !!DB.locks[monthKey(uid,y,m)];}
 function isOffDay(y,m,d,offDay){return new Date(y,m,d).getDay()===offDay;}
-function beforeStart(y,m,d){return new Date(y,m,d)<START;}
+function beforeStart(y,m,d){return new Date(y,m,d)<getStartDate();}
 function avatarLetter(name){return name.charAt(0);}
 function colorForUser(u){return u.color||COLORS[0];}
 
@@ -1729,6 +1755,15 @@ function quickTapDay(day){
   const cycle=offDay?CYCLE_OFFDAY:CYCLE_NORMAL;
   const idx=cycle.indexOf(cur);
   const next=cycle[(idx+1)%cycle.length];
+  // Confirm before changing an existing shift (if setting is ON)
+  if(cur!=='none' && DB.settings.confirmOnChange){
+    const curLabel=getShiftLabel(cur);
+    const nextLabel=getShiftLabel(next);
+    const msg=lang==='ar'
+      ?`يوم ${day}: "${curLabel}" ← "${nextLabel}"؟`
+      :`Day ${day}: "${curLabel}" → "${nextLabel}"?`;
+    if(!confirm(msg)) return;
+  }
   // save for undo
   undoStack={k,prev:cur};
   DB.shifts[k]=next;
@@ -1860,8 +1895,19 @@ function renderSettings(){
   // rounding
   const tog=document.getElementById('stg-rounding-toggle');
   if(tog) tog.classList.toggle('on',s.roundAmounts);
+  // confirm on change
+  const ctog=document.getElementById('stg-confirm-toggle');
+  if(ctog) ctog.classList.toggle('on',s.confirmOnChange);
   // first day
   document.getElementById('stg-firstday-val').textContent=T[lang].days[s.firstDayOfWeek];
+  // start date
+  const sdEl=document.getElementById('stg-startdate-val');
+  if(sdEl){
+    if(s.startDate){
+      const sd=new Date(s.startDate);
+      sdEl.textContent=`${sd.getDate()} ${T[lang].months[sd.getMonth()]} ${sd.getFullYear()}`;
+    } else sdEl.textContent='—';
+  }
   // last backup
   const lb=localStorage.getItem('myshifts_last_backup');
   const lbEl=document.getElementById('stg-last-backup');
@@ -1910,8 +1956,12 @@ function renderSettings(){
     document.getElementById('stg-othours-sub').textContent='Hours counted as overtime in qualifying shifts';
     document.getElementById('stg-rounding-lbl').textContent='Round Amounts';
     document.getElementById('stg-rounding-sub').textContent='Round monetary values to whole numbers';
+    document.getElementById('stg-confirm-lbl').textContent='Confirm Shift Changes';
+    document.getElementById('stg-confirm-sub').textContent='Ask before changing an existing shift';
     document.getElementById('stg-firstday-lbl').textContent='First Day of Week';
     document.getElementById('stg-firstday-sub').textContent='Calendar display order';
+    document.getElementById('stg-startdate-lbl').textContent='Employment Start Date';
+    document.getElementById('stg-startdate-sub').textContent='Days before this date are locked';
     document.getElementById('stg-formula-note').textContent='Bonuses are calculated based on these settings — tap any shift to edit';
     document.getElementById('stg-backup-title').textContent='💾 Save Data';
     document.getElementById('stg-backup-desc').textContent='Save all your shifts and settings to a file. If you clear cache or change devices, open this file to restore everything.';
@@ -2039,6 +2089,11 @@ function toggleRounding(){
   saveSettings();renderSettings();
 }
 
+function toggleConfirmOnChange(){
+  DB.settings.confirmOnChange=!DB.settings.confirmOnChange;
+  saveSettings();renderSettings();
+}
+
 function openFirstDayPicker(){
   const isAr=lang==='ar';
   const s=getSettings();
@@ -2059,6 +2114,41 @@ function openFirstDayPicker(){
 
 function setFirstDay(d){
   DB.settings.firstDayOfWeek=d;saveSettings();closeModal();renderSettings();
+}
+
+function openStartDatePicker(){
+  const isAr=lang==='ar';
+  const s=getSettings();
+  const cur=s.startDate||'2026-05-01';
+  document.getElementById('modal-root').innerHTML=`
+    <div class="overlay" onclick="closeModal(event)">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <h3>${isAr?'تاريخ بداية العمل':'Employment Start Date'}</h3>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.6">
+          ${isAr?'الأيام قبل التاريخ ده مش هتقدر تعدلها في التقويم.':'Days before this date will be locked in the calendar.'}
+        </div>
+        <div class="form-group">
+          <label class="form-label">${isAr?'التاريخ:':'Date:'}</label>
+          <input class="form-input" id="startdate-input" type="date" value="${cur}">
+        </div>
+        <button class="submit-btn" onclick="saveStartDate()">${isAr?'حفظ':'Save'}</button>
+        <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
+      </div>
+    </div>`;
+}
+
+function saveStartDate(){
+  const val=document.getElementById('startdate-input')?.value;
+  if(!val) return;
+  const d=new Date(val);
+  if(isNaN(d)){alert(lang==='ar'?'تاريخ غلط':'Invalid date');return;}
+  DB.settings.startDate=val;
+  saveSettings();
+  closeModal();
+  renderSettings();
+  render();
+  showToastMsg(lang==='ar'?'✅ تم حفظ تاريخ البداية':'✅ Start date saved');
 }
 
 function openShiftBonusEditor(shiftId){
