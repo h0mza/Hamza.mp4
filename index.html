@@ -649,6 +649,7 @@ const T={
     offNightDays:'بليل يوم إجازة',offFullDays:'صبح+بليل يوم إجازة',totalBonusH:'إجمالي الزيادة',
     leaveDeductH:'أيام إجازة مخصومة',monthTotalH:'إجمالي الشهر',netAfterH:'الصافي بعد السلف',
     reportFor:'تقرير',reportSalary:'مرتب',day:'يوم',leave2:'إجازة',
+    analytics:'تحليلات',settings:'الإعدادات',
     confirmDelete:'هتحذف المستخدم ده وكل بياناته؟',checkData:'تأكد من البيانات'
   },
   en:{
@@ -679,6 +680,7 @@ const T={
     offNightDays:'Night shift day off',offFullDays:'Mor+Night day off',totalBonusH:'Total Bonus',
     leaveDeductH:'Leave days deducted',monthTotalH:'Month Total',netAfterH:'Net After Advances',
     reportFor:'Report',reportSalary:'Salary',day:'day',leave2:'Leave',
+    analytics:'Analytics',settings:'Settings',
     confirmDelete:'Delete this user and all their data?',checkData:'Check data — something is wrong'
   }
 };
@@ -712,11 +714,20 @@ function toggleLegend(){
 function updateAllLabels(){
   const ids={
     'nav-lbl-calendar':'calendar','nav-lbl-history':'history','nav-lbl-leave':'leave',
-    'add-user-lbl':'addUser'
+    'nav-lbl-analytics':'analytics','nav-lbl-settings':'settings','add-user-lbl':'addUser'
   };
   Object.entries(ids).forEach(([id,key])=>{const el=document.getElementById(id);if(el)el.textContent=t(key);});
   const lt=document.getElementById('legend-toggle-lbl');
   if(lt) lt.textContent=lang==='ar'?'ألوان التقويم':'Legend';
+  // page titles
+  const histTitle=document.querySelector('#page-history .topbar h1');
+  if(histTitle) histTitle.textContent=t('history');
+  const leaveTitle2=document.querySelector('#page-leave .topbar h1');
+  if(leaveTitle2) leaveTitle2.textContent=t('leave');
+  const analyticsTitle=document.getElementById('analytics-title');
+  if(analyticsTitle) analyticsTitle.textContent=t('analytics');
+  const settingsTitle=document.getElementById('settings-title');
+  if(settingsTitle) settingsTitle.textContent=t('settings');
 }
 
 // DATA
@@ -727,27 +738,36 @@ function getStartDate(){
   if(s){const d=new Date(s);if(!isNaN(d)) return d;}
   return new Date(2026,4,1); // fallback only if settings broken
 }
-const DEFAULT_USERS=[{id:'hamza',name:'حمزة',salary:7000,offDay:0,wdStart:14,wdEnd:23,weStart:15,weEnd:24,color:'#4A9EFF'}];
-
-// SETTINGS DEFAULTS
-const DEFAULT_SETTINGS={
-  calcBase:30,          // days basis for daily rate
-  offDaysPerWeek:1,     // number of weekly off days
+// Default per-user settings
+const DEFAULT_USER_SETTINGS={
+  calcBase:30,
   currency:'EGP',
-  overtimeRate:1.5,     // multiplier for OT hours
-  overtimeHours:4,      // OT hours per qualifying shift
+  overtimeRate:1.5,
+  overtimeHours:4,
+  // flexible shifts: array of {id, nameAr, nameEn, start, end, isOffDay, bonusFormula, bonusCustomVal}
+  shiftTypes:[
+    {id:'night',    nameAr:'شيفت بليل (عادي)',   nameEn:'Night (regular)',    start:14,end:23,isOffDay:false,bonusFormula:'none',  bonusCustomVal:0},
+    {id:'full',     nameAr:'صبح + بليل (عادي)', nameEn:'Full day (regular)', start:14,end:23,isOffDay:false,bonusFormula:'daily', bonusCustomVal:0},
+    {id:'off-night',nameAr:'شيفت بليل (إجازة)', nameEn:'Night (day off)',    start:15,end:24,isOffDay:true, bonusFormula:'daily', bonusCustomVal:0},
+    {id:'off-full', nameAr:'صبح + بليل (إجازة)',nameEn:'Full day (day off)', start:15,end:24,isOffDay:true, bonusFormula:'offfull',bonusCustomVal:0},
+  ]
+};
+
+const DEFAULT_USERS=[{
+  id:'hamza',name:'حمزة',salary:7000,offDay:0,color:'#4A9EFF',
+  // legacy compat fields — still used as fallback
+  wdStart:14,wdEnd:23,weStart:15,weEnd:24,
+  uSettings:{...DEFAULT_USER_SETTINGS}
+}];
+
+// GLOBAL SETTINGS (not per-user)
+const DEFAULT_SETTINGS={
   roundAmounts:true,
-  firstDayOfWeek:0,     // 0=Sun, 6=Sat
-  startDate:'2026-05-01', // employment start date (YYYY-MM-DD)
-  chapterName:'',         // current life/work phase label
-  confirmOnChange:true,   // ask before changing an existing shift
-  // shift bonus formulas: 'none','daily','offnight','offfull','custom'
-  shiftBonuses:{
-    night:   {formula:'none',   customVal:0},
-    full:    {formula:'daily',  customVal:0},
-    'off-night':{formula:'daily',  customVal:0},
-    'off-full': {formula:'offfull',customVal:0}
-  }
+  firstDayOfWeek:0,
+  startDate:'2026-05-01',
+  chapterName:'',
+  confirmOnChange:true,
+  offDaysPerWeek:1,   // kept for legacy
 };
 
 function loadDB(){try{return JSON.parse(localStorage.getItem('myshifts_v3')||'null');}catch(e){return null;}}
@@ -759,29 +779,61 @@ if(!DB.shifts) DB.shifts={};
 if(!DB.locks) DB.locks={};
 if(!DB.advances) DB.advances={};
 if(!DB.notes) DB.notes={};
-if(!DB.chapters) DB.chapters=[];   // archived chapters
-if(!DB.shiftMeta) DB.shiftMeta={}; // timestamps + deductions per shift key
+if(!DB.chapters) DB.chapters=[];
+if(!DB.shiftMeta) DB.shiftMeta={};
 if(!DB.settings) DB.settings={...DEFAULT_SETTINGS};
-// merge any missing keys from defaults
 DB.settings={...DEFAULT_SETTINGS,...DB.settings};
-if(!DB.settings.shiftBonuses) DB.settings.shiftBonuses={...DEFAULT_SETTINGS.shiftBonuses};
+
+// Migrate existing users: if they have no uSettings, build from old global settings + legacy fields
+DB.users.forEach(u=>{
+  if(!u.uSettings){
+    const gs=DB.settings||DEFAULT_SETTINGS;
+    u.uSettings={
+      calcBase:gs.calcBase||30,
+      currency:gs.currency||'EGP',
+      overtimeRate:gs.overtimeRate||1.5,
+      overtimeHours:gs.overtimeHours||4,
+      shiftTypes:[
+        {id:'night',    nameAr:'شيفت بليل (عادي)',   nameEn:'Night (regular)',    start:u.wdStart||14,end:u.wdEnd||23,isOffDay:false,bonusFormula:'none',  bonusCustomVal:0},
+        {id:'full',     nameAr:'صبح + بليل (عادي)', nameEn:'Full day (regular)', start:u.wdStart||14,end:u.wdEnd||23,isOffDay:false,bonusFormula:'daily', bonusCustomVal:0},
+        {id:'off-night',nameAr:'شيفت بليل (إجازة)', nameEn:'Night (day off)',    start:u.weStart||15,end:u.weEnd||24,isOffDay:true, bonusFormula:'daily', bonusCustomVal:0},
+        {id:'off-full', nameAr:'صبح + بليل (إجازة)',nameEn:'Full day (day off)', start:u.weStart||15,end:u.weEnd||24,isOffDay:true, bonusFormula:'offfull',bonusCustomVal:0},
+      ]
+    };
+  }
+  if(!u.uSettings.shiftTypes||!u.uSettings.shiftTypes.length){
+    u.uSettings.shiftTypes=[...DEFAULT_USER_SETTINGS.shiftTypes];
+  }
+});
+saveDB();
 
 function getSettings(){return DB.settings;}
+function getUserSettings(u){return u.uSettings||DEFAULT_USER_SETTINGS;}
 function saveSettings(){saveDB();}
 
+// Get shift types for a user split by off-day
+function getUserShifts(u,offDay){
+  const st=getUserSettings(u).shiftTypes||[];
+  return st.filter(s=>s.isOffDay===offDay);
+}
+
+// Get all shift ids for a user
+function allUserShiftIds(u){
+  return (getUserSettings(u).shiftTypes||[]).map(s=>s.id);
+}
+
 function calcBonusForShift(u,shiftId){
-  const s=getSettings();
-  const daily=u.salary/s.calcBase;
-  const wdHours=u.wdEnd-u.wdStart;
-  const hourly=u.salary/(s.calcBase*wdHours);
-  const otBonus=s.overtimeHours*hourly*s.overtimeRate;
-  const bf=s.shiftBonuses[shiftId];
-  if(!bf) return 0;
-  if(bf.formula==='none') return 0;
-  if(bf.formula==='daily') return daily;
-  if(bf.formula==='offnight') return daily;
-  if(bf.formula==='offfull') return daily+otBonus;
-  if(bf.formula==='custom') return bf.customVal||0;
+  const us=getUserSettings(u);
+  const daily=u.salary/us.calcBase;
+  const st=(us.shiftTypes||[]).find(s=>s.id===shiftId);
+  if(!st) return 0;
+  const hrs=st.end-st.start;
+  const hourly=u.salary/(us.calcBase*Math.max(hrs,1));
+  const otBonus=us.overtimeHours*hourly*us.overtimeRate;
+  if(st.bonusFormula==='none')    return 0;
+  if(st.bonusFormula==='daily')   return daily;
+  if(st.bonusFormula==='offfull') return daily+otBonus;
+  if(st.bonusFormula==='custom')  return st.bonusCustomVal||0;
   return 0;
 }
 
@@ -801,30 +853,30 @@ function avatarLetter(name){return name.charAt(0);}
 function colorForUser(u){return u.color||COLORS[0];}
 
 function userCalc(u){
-  const s=getSettings();
-  const daily=u.salary/s.calcBase;
-  const wdHours=u.wdEnd-u.wdStart;
-  const hourly=u.salary/(s.calcBase*wdHours);
-  const otBonus=s.overtimeHours*hourly*s.overtimeRate;
-  return {
-    daily,hourly,wdHours,
-    fullBonus:calcBonusForShift(u,'full'),
-    offNightBonus:calcBonusForShift(u,'off-night'),
-    offFullBonus:calcBonusForShift(u,'off-full')
-  };
+  const us=getUserSettings(u);
+  const daily=u.salary/us.calcBase;
+  // use first non-offday shift for base hours
+  const wdShift=(us.shiftTypes||[]).find(s=>!s.isOffDay)||{start:14,end:23};
+  const wdHours=wdShift.end-wdShift.start;
+  const hourly=u.salary/(us.calcBase*Math.max(wdHours,1));
+  // build bonuses map for all shift types
+  const bonuses={};
+  (us.shiftTypes||[]).forEach(st=>{bonuses[st.id]=calcBonusForShift(u,st.id);});
+  return {daily,hourly,wdHours,bonuses};
 }
 
 function getBonus(u,shiftId){
-  const s=getSettings();
-  const daily=u.salary/s.calcBase;
-  if(shiftId==='full') return calcBonusForShift(u,'full');
-  if(shiftId==='off-night') return calcBonusForShift(u,'off-night');
-  if(shiftId==='off-full') return calcBonusForShift(u,'off-full');
-  if(shiftId==='leave') return -daily;
-  return 0;
+  if(shiftId==='leave'){const us=getUserSettings(u);return -(u.salary/us.calcBase);}
+  return calcBonusForShift(u,shiftId);
 }
 
-function getShiftLabel(id){
+function getShiftLabel(id,u){
+  if(u){
+    const us=getUserSettings(u);
+    const st=(us.shiftTypes||[]).find(s=>s.id===id);
+    if(st) return lang==='ar'?st.nameAr:st.nameEn;
+  }
+  // fallback to translation map
   const map={none:t('noShift'),night:t('nightShift'),full:t('fullShift'),'off-night':t('offNight'),'off-full':t('offFull'),leave:t('leaveDay')};
   return map[id]||id;
 }
@@ -995,18 +1047,15 @@ function renderSummary(){
 function openShift(day){
   selDay=day;
   const u=curUser();const c=userCalc(u);
+  const us=getUserSettings(u);
   const k=key(u.id,yr,mo,day);
   const cur=DB.shifts[k]||'none';
   const offDay=isOffDay(yr,mo,day,u.offDay);
-  const SHIFTS=offDay?[
+  // get shifts for this day type from user's shift types
+  const dayShifts=getUserShifts(u,offDay);
+  const SHIFTS=[
     {id:'none',label:t('noShift'),bonus:0},
-    {id:'night',label:t('nightShift'),bonus:0},
-    {id:'off-night',label:t('offNight'),bonus:c.offNightBonus},
-    {id:'off-full',label:t('offFull'),bonus:c.offFullBonus},
-  ]:[
-    {id:'none',label:t('noShift'),bonus:0},
-    {id:'night',label:t('nightShift'),bonus:0},
-    {id:'full',label:t('fullShift'),bonus:c.fullBonus},
+    ...dayShifts.map(st=>({id:st.id,label:lang==='ar'?st.nameAr:st.nameEn,bonus:calcBonusForShift(u,st.id)}))
   ];
   const dayName=T[lang].days[new Date(yr,mo,day).getDay()];
   const noteKey=`note|${key(u.id,yr,mo,day)}`;
@@ -1400,22 +1449,25 @@ function exportMonth(uid,mk,e){
   const [y,m]=mk.split('-');const mi=parseInt(m)-1;
   const prefix=`${uid}|${y}-${m}-`;
   let lines=[`============================`,`${t('reportFor')} ${u.name} — ${T[lang].months[mi]} ${y}`,`${t('reportSalary')}: ${u.salary.toLocaleString()}`,`============================`,``];
-  let bonus=0,deduct=0;
+  let bonus=0,deduct=0,extraDeduct=0;
   Object.keys(DB.shifts).filter(k=>k.startsWith(prefix)&&DB.shifts[k]!=='none').sort().forEach(k=>{
     const d=parseInt(k.split('|')[1].split('-')[2]);
     const v=DB.shifts[k];
     const dt=new Date(parseInt(y),mi,d);
     const dayName=T[lang].days[dt.getDay()];
+    const dayDeduct=getShiftDeduction(k,c.daily);
     if(v==='leave'){lines.push(`${dayName} ${d}/${m}/${y} — ${t('leave2')} (-${c.daily.toFixed(0)})`);deduct+=c.daily;}
-    else{const b=getBonus(u,v);lines.push(`${dayName} ${d}/${m}/${y} — ${getShiftLabel(v)}${b>0?' (+'+b.toFixed(0)+')':''}`);bonus+=b;}
+    else{const b=getBonus(u,v);let line=`${dayName} ${d}/${m}/${y} — ${getShiftLabel(v)}${b>0?' (+'+b.toFixed(0)+')':''}`;if(dayDeduct>0) line+=` ✂️ (-${dayDeduct.toFixed(0)})`;lines.push(line);bonus+=b;}
+    extraDeduct+=dayDeduct;
   });
   const advList=getMonthAdvances(uid,parseInt(y),mi);
   if(advList.length){lines.push('');lines.push('--- Advances ---');advList.forEach(a=>lines.push(`${a.date}: -${a.amount.toFixed(0)}${a.note?' ('+a.note+')':''}`));}
   const adv=getTotalAdvance(uid,parseInt(y),mi);
-  const net=u.salary+bonus-deduct-adv;
+  const net=u.salary+bonus-deduct-extraDeduct-adv;
   lines.push(``);lines.push(`============================`);
   lines.push(`${t('totalBonusH')}: +${bonus.toFixed(0)}`);
   if(deduct>0) lines.push(`${t('leaveDeductH')}: -${deduct.toFixed(0)}`);
+  if(extraDeduct>0) lines.push(`${lang==='ar'?'خصومات أيام':'Day Deductions'}: -${extraDeduct.toFixed(0)}`);
   if(adv>0) lines.push(`${t('advance')}: -${adv.toFixed(0)}`);
   lines.push(`${t('monthTotalH')}: ${net.toFixed(0)}`);
   lines.push(`============================`);
@@ -1922,7 +1974,8 @@ function quickTapDay(day){
   const k=key(u.id,yr,mo,day);
   const cur=DB.shifts[k]||'none';
   const offDay=isOffDay(yr,mo,day,u.offDay);
-  const cycle=offDay?CYCLE_OFFDAY:CYCLE_NORMAL;
+  const dayShifts=getUserShifts(u,offDay).map(s=>s.id);
+  const cycle=['none',...dayShifts];
   const idx=cycle.indexOf(cur);
   const next=cycle[(idx+1)%cycle.length];
   // Confirm before changing an existing shift (if setting is ON)
@@ -2064,16 +2117,18 @@ const SHIFT_META={
 function renderSettings(){
   const isAr=lang==='ar';
   const s=getSettings();
+  const u=curUser();
+  const us=getUserSettings(u);
   // calc method
-  const cb=CALC_BASE_OPTIONS.find(o=>o.val===s.calcBase)||CALC_BASE_OPTIONS[1];
+  const cb=CALC_BASE_OPTIONS.find(o=>o.val===us.calcBase)||CALC_BASE_OPTIONS[1];
   document.getElementById('stg-calcmethod-val').textContent=isAr?cb.label:cb.labelEn;
   // off days
-  document.getElementById('stg-offdays-val').textContent=s.offDaysPerWeek+(isAr?' يوم':' day(s)');
+  document.getElementById('stg-offdays-val').textContent=(s.offDaysPerWeek||1)+(isAr?' يوم':' day(s)');
   // currency
-  document.getElementById('stg-currency-val').textContent=s.currency;
+  document.getElementById('stg-currency-val').textContent=us.currency;
   // OT
-  document.getElementById('stg-ot-val').textContent='× '+s.overtimeRate;
-  document.getElementById('stg-othours-val').textContent=s.overtimeHours+(isAr?' ساعات':' hrs');
+  document.getElementById('stg-ot-val').textContent='× '+us.overtimeRate;
+  document.getElementById('stg-othours-val').textContent=us.overtimeHours+(isAr?' ساعات':' hrs');
   // rounding
   const tog=document.getElementById('stg-rounding-toggle');
   if(tog) tog.classList.toggle('on',s.roundAmounts);
@@ -2153,6 +2208,8 @@ function renderSettings(){
     }).join('');
   }
   // update UI labels for current lang
+  const settingsTitleEl=document.getElementById('settings-title');
+  if(settingsTitleEl) settingsTitleEl.textContent=t('settings');
   if(isAr){
     const el=document.getElementById('settings-sub');if(el)el.textContent='تخصيص طريقة الحساب';
   } else {
@@ -2189,16 +2246,16 @@ function renderSettings(){
 
 function openCalcMethodPicker(){
   const isAr=lang==='ar';
-  const s=getSettings();
+  const us=getUserSettings(curUser());
   document.getElementById('modal-root').innerHTML=`
     <div class="overlay" onclick="closeModal(event)">
       <div class="modal" onclick="event.stopPropagation()">
         <div class="modal-handle"></div>
         <h3>${isAr?'أساس حساب المرتب':'Salary Calculation Basis'}</h3>
         ${CALC_BASE_OPTIONS.map(o=>`
-          <button class="shift-btn ${s.calcBase===o.val?'active':''}" onclick="setCalcBase(${o.val})">
+          <button class="shift-btn ${us.calcBase===o.val?'active':''}" onclick="setCalcBase(${o.val})">
             <span>${isAr?o.label:o.labelEn}</span>
-            ${s.calcBase===o.val?'<span style="color:var(--blue)">✓</span>':''}
+            ${us.calcBase===o.val?'<span style="color:var(--blue)">✓</span>':''}
           </button>`).join('')}
         <div style="font-size:12px;color:var(--text3);margin-top:8px;line-height:1.6">
           ${isAr?'ده بيأثر على اليومية وبالتالي على الزيادة والخصومات':'This affects daily rate and therefore bonuses & deductions'}
@@ -2209,7 +2266,7 @@ function openCalcMethodPicker(){
 }
 
 function setCalcBase(val){
-  DB.settings.calcBase=val;saveSettings();closeModal();renderSettings();render();
+  curUser().uSettings.calcBase=val;saveDB();closeModal();renderSettings();render();
 }
 
 function openOffDayCountPicker(){
@@ -2221,9 +2278,9 @@ function openOffDayCountPicker(){
         <div class="modal-handle"></div>
         <h3>${isAr?'أيام الإجازة الأسبوعية':'Weekly Off Days'}</h3>
         ${[1,2].map(n=>`
-          <button class="shift-btn ${s.offDaysPerWeek===n?'active':''}" onclick="setOffDayCount(${n})">
+          <button class="shift-btn ${(s.offDaysPerWeek||1)===n?'active':''}" onclick="setOffDayCount(${n})">
             <span>${n} ${isAr?'يوم':'day(s)'}</span>
-            ${s.offDaysPerWeek===n?'<span style="color:var(--blue)">✓</span>':''}
+            ${(s.offDaysPerWeek||1)===n?'<span style="color:var(--blue)">✓</span>':''}
           </button>`).join('')}
         <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
       </div>
@@ -2236,16 +2293,16 @@ function setOffDayCount(n){
 
 function openCurrencyPicker(){
   const isAr=lang==='ar';
-  const s=getSettings();
+  const us=getUserSettings(curUser());
   document.getElementById('modal-root').innerHTML=`
     <div class="overlay" onclick="closeModal(event)">
       <div class="modal" onclick="event.stopPropagation()">
         <div class="modal-handle"></div>
         <h3>${isAr?'العملة':'Currency'}</h3>
         ${CURRENCY_OPTIONS.map(c=>`
-          <button class="shift-btn ${s.currency===c?'active':''}" onclick="setCurrency('${c}')">
+          <button class="shift-btn ${us.currency===c?'active':''}" onclick="setCurrency('${c}')">
             <span>${c}</span>
-            ${s.currency===c?'<span style="color:var(--blue)">✓</span>':''}
+            ${us.currency===c?'<span style="color:var(--blue)">✓</span>':''}
           </button>`).join('')}
         <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
       </div>
@@ -2253,21 +2310,21 @@ function openCurrencyPicker(){
 }
 
 function setCurrency(c){
-  DB.settings.currency=c;saveSettings();closeModal();renderSettings();
+  curUser().uSettings.currency=c;saveDB();closeModal();renderSettings();
 }
 
 function openOvertimePicker(){
   const isAr=lang==='ar';
-  const s=getSettings();
+  const us=getUserSettings(curUser());
   document.getElementById('modal-root').innerHTML=`
     <div class="overlay" onclick="closeModal(event)">
       <div class="modal" onclick="event.stopPropagation()">
         <div class="modal-handle"></div>
         <h3>${isAr?'معامل الأوفرتايم':'Overtime Multiplier'}</h3>
         ${[1.0,1.25,1.5,1.75,2.0].map(r=>`
-          <button class="shift-btn ${s.overtimeRate===r?'active':''}" onclick="setOvertimeRate(${r})">
+          <button class="shift-btn ${us.overtimeRate===r?'active':''}" onclick="setOvertimeRate(${r})">
             <span>× ${r}</span>
-            ${s.overtimeRate===r?'<span style="color:var(--blue)">✓</span>':''}
+            ${us.overtimeRate===r?'<span style="color:var(--blue)">✓</span>':''}
           </button>`).join('')}
         <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
       </div>
@@ -2275,21 +2332,21 @@ function openOvertimePicker(){
 }
 
 function setOvertimeRate(r){
-  DB.settings.overtimeRate=r;saveSettings();closeModal();renderSettings();
+  curUser().uSettings.overtimeRate=r;saveDB();closeModal();renderSettings();
 }
 
 function openOTHoursPicker(){
   const isAr=lang==='ar';
-  const s=getSettings();
+  const us=getUserSettings(curUser());
   document.getElementById('modal-root').innerHTML=`
     <div class="overlay" onclick="closeModal(event)">
       <div class="modal" onclick="event.stopPropagation()">
         <div class="modal-handle"></div>
         <h3>${isAr?'ساعات الأوفرتايم في الشيفت':'Overtime Hours per Shift'}</h3>
         ${[2,3,4,5,6,8].map(h=>`
-          <button class="shift-btn ${s.overtimeHours===h?'active':''}" onclick="setOTHours(${h})">
+          <button class="shift-btn ${us.overtimeHours===h?'active':''}" onclick="setOTHours(${h})">
             <span>${h} ${isAr?'ساعات':'hours'}</span>
-            ${s.overtimeHours===h?'<span style="color:var(--blue)">✓</span>':''}
+            ${us.overtimeHours===h?'<span style="color:var(--blue)">✓</span>':''}
           </button>`).join('')}
         <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
       </div>
@@ -2297,7 +2354,7 @@ function openOTHoursPicker(){
 }
 
 function setOTHours(h){
-  DB.settings.overtimeHours=h;saveSettings();closeModal();renderSettings();
+  curUser().uSettings.overtimeHours=h;saveDB();closeModal();renderSettings();
 }
 
 function toggleRounding(){
@@ -2336,105 +2393,314 @@ function setFirstDay(d){
 // CHAPTER CLOSE WIZARD
 // ========================
 
+// pending chapter close — stored here between confirm screen and execute
+let _pendingChapterClose=null;
+// wizard state
+let _wizardStep=1;
+let _wizardUserFates={};   // uid -> 'keep' | 'archive'
+let _wizardNewUsers={};    // uid -> {name,salary,offDay,wdStart,wdEnd,weStart,weEnd} for kept users
+let _wizardPhase={name:'',date:''};
+
 function openCloseChapterWizard(){
-  const isAr=lang==='ar';
-  const s=getSettings();
-  const users=DB.users;
-  // build user selection rows
-  const userRows=users.map(u=>`
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--border)">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div style="width:32px;height:32px;border-radius:50%;background:${u.color};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff">${u.name.charAt(0)}</div>
-        <div>
-          <div style="font-size:14px;font-weight:600">${u.name}</div>
-          <div style="font-size:11px;color:var(--text3)">${u.salary.toLocaleString()} ${s.currency}</div>
-        </div>
-      </div>
-      <select id="user-fate-${u.id}" style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:6px 10px;color:var(--text);font-size:12px;font-family:inherit">
-        <option value="keep">${isAr?'ينتقل للجديدة':'Move to new'}</option>
-        <option value="archive">${isAr?'يتأرشف مع القديمة':'Archive with old'}</option>
-      </select>
-    </div>`).join('');
-
-  document.getElementById('modal-root').innerHTML=`
-    <div class="overlay" onclick="closeModal(event)">
-      <div class="modal" onclick="event.stopPropagation()">
-        <div class="modal-handle"></div>
-        <h3>🔒 ${isAr?'إنهاء المرحلة الحالية':'Close Current Phase'}</h3>
-        <div style="background:var(--amber-dim);border:0.5px solid rgba(245,166,35,0.3);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--amber);line-height:1.6">
-          ⚠️ ${isAr?'البيانات القديمة مش هتتمسح — هتتأرشف وتفضل موجودة.':'Old data won\'t be deleted — it will be archived and kept.'}
-        </div>
-        <div style="font-size:12px;font-weight:700;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.6px">${isAr?'مصير كل مستخدم:':'What happens to each user:'}</div>
-        ${userRows}
-        <div style="margin-top:14px">
-          <div class="form-label" style="margin-bottom:6px">${isAr?'اسم المرحلة الجديدة:':'New phase name:'}</div>
-          <input class="form-input" id="new-chapter-name" placeholder="${isAr?'مثلاً: القاهرة - مستشفى جديد':'e.g. Cairo - New Hospital'}">
-          <div class="form-label" style="margin-top:10px;margin-bottom:6px">${isAr?'تاريخ بداية المرحلة الجديدة:':'New phase start date:'}</div>
-          <input class="form-input" id="new-chapter-date" type="date" value="${new Date().toISOString().split('T')[0]}">
-        </div>
-        <button class="submit-btn" style="margin-top:14px" onclick="confirmCloseChapter()">${isAr?'✅ إنهاء وبدء جديد':'✅ Close & Start New'}</button>
-        <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
-      </div>
-    </div>`;
+  _wizardStep=1;
+  _wizardUserFates={};
+  _wizardNewUsers={};
+  _wizardPhase={name:'',date:new Date().toISOString().split('T')[0]};
+  DB.users.forEach(u=>{_wizardUserFates[u.id]='keep';});
+  renderWizardStep();
 }
 
-function confirmCloseChapter(){
+function renderWizardStep(){
   const isAr=lang==='ar';
   const s=getSettings();
-  const newName=document.getElementById('new-chapter-name')?.value?.trim()||'';
-  const newDate=document.getElementById('new-chapter-date')?.value;
-  if(!newDate){alert(isAr?'اختار تاريخ للمرحلة الجديدة':'Choose a start date');return;}
+  const root=document.getElementById('modal-root');
 
-  // collect user fates
-  const userFates={};
-  DB.users.forEach(u=>{
-    userFates[u.id]=document.getElementById('user-fate-'+u.id)?.value||'keep';
-  });
+  if(_wizardStep===1){
+    // Step 1: fate of each user
+    const userRows=DB.users.map(u=>`
+      <div style="background:var(--surface2);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <div style="display:flex;align-items:center;gap:10px;flex:1">
+          <div style="width:34px;height:34px;border-radius:50%;background:${u.color||'#4A9EFF'};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0">${u.name.charAt(0)}</div>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:var(--text)">${u.name}</div>
+            <div style="font-size:11px;color:var(--text3)">${u.salary.toLocaleString()} ${s.currency}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <button id="fate-keep-${u.id}" onclick="setWizardFate('${u.id}','keep')"
+            style="padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;transition:all 0.15s;
+              background:${_wizardUserFates[u.id]==='keep'?'var(--blue)':'var(--surface3)'};
+              color:${_wizardUserFates[u.id]==='keep'?'#fff':'var(--text2)'};border:none">
+            ${isAr?'ينتقل':'Move'}
+          </button>
+          <button id="fate-arch-${u.id}" onclick="setWizardFate('${u.id}','archive')"
+            style="padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;transition:all 0.15s;
+              background:${_wizardUserFates[u.id]==='archive'?'var(--red)':'var(--surface3)'};
+              color:${_wizardUserFates[u.id]==='archive'?'#fff':'var(--text2)'};border:none">
+            ${isAr?'يتأرشف':'Archive'}
+          </button>
+        </div>
+      </div>`).join('');
 
-  // snapshot current chapter into DB.chapters
-  const archivedChapter={
-    id:'ch_'+Date.now(),
-    name:s.chapterName||'',
-    startDate:s.startDate,
-    endDate:new Date().toISOString().split('T')[0],
-    users:DB.users.map(u=>({...u})),
-    archivedUserIds:DB.users.filter(u=>userFates[u.id]==='archive').map(u=>u.id),
-  };
+    root.innerHTML=`
+      <div class="overlay" onclick="closeModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-handle"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <h3 style="margin-bottom:0">🔒 ${isAr?'إنهاء المرحلة':'Close Phase'}</h3>
+            <span style="font-size:11px;color:var(--text3);font-weight:600">${isAr?'خطوة 1 من 3':'Step 1 of 3'}</span>
+          </div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:14px">${isAr?'مين ينتقل للمرحلة الجديدة؟':'Who moves to the new phase?'}</div>
+          <div style="background:var(--amber-dim);border:0.5px solid rgba(245,166,35,0.3);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--amber);line-height:1.6">
+            ⚠️ ${isAr?'البيانات القديمة مش هتتمسح — هتتأرشف.':'Old data stays archived — nothing deleted.'}
+          </div>
+          ${userRows}
+          <button class="submit-btn" style="margin-top:8px" onclick="wizardNext()">${isAr?'التالي ←':'Next →'}</button>
+          <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
+        </div>
+      </div>`;
+
+  } else if(_wizardStep===2){
+    // Step 2: details for each user moving to new phase
+    const keepUsers=DB.users.filter(u=>_wizardUserFates[u.id]==='keep');
+    // init _wizardNewUsers for any not yet set
+    keepUsers.forEach(u=>{
+      if(!_wizardNewUsers[u.id]) _wizardNewUsers[u.id]={
+        name:u.name,salary:u.salary,offDay:u.offDay,
+        wdStart:u.wdStart,wdEnd:u.wdEnd,weStart:u.weStart,weEnd:u.weEnd
+      };
+    });
+
+    const userForms=keepUsers.map(u=>{
+      const nu=_wizardNewUsers[u.id];
+      return `
+        <div style="background:var(--surface2);border-radius:12px;padding:14px;margin-bottom:12px;border:1px solid var(--border2)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+            <div style="width:28px;height:28px;border-radius:50%;background:${u.color||'#4A9EFF'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff">${u.name.charAt(0)}</div>
+            <span style="font-size:13px;font-weight:700;color:var(--text)">${u.name}</span>
+          </div>
+          <div class="form-group" style="margin-bottom:10px">
+            <label class="form-label">${t('name')}</label>
+            <input class="form-input" id="nw-name-${u.id}" value="${nu.name}" placeholder="${t('name')}">
+          </div>
+          <div class="form-group" style="margin-bottom:10px">
+            <label class="form-label">${t('monthlySalary')}</label>
+            <input class="form-input" id="nw-salary-${u.id}" type="number" value="${nu.salary}" oninput="updateWizardPreview('${u.id}')">
+          </div>
+          <div class="form-group" style="margin-bottom:10px">
+            <label class="form-label">${t('offDay')}</label>
+            <select class="form-select" id="nw-offday-${u.id}">
+              ${T[lang].days.map((d,i)=>`<option value="${i}" ${nu.offDay===i?'selected':''}>${d}</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:10px">
+            <label class="form-label">${isAr?'شيفتات الأيام العادية — من / لـ':'Weekdays shift — From / To'}</label>
+            <div class="form-row">
+              <input class="form-input" id="nw-wdstart-${u.id}" type="number" min="0" max="23" value="${nu.wdStart}" placeholder="${isAr?'من':'From'}" oninput="updateWizardPreview('${u.id}')">
+              <input class="form-input" id="nw-wdend-${u.id}" type="number" min="1" max="24" value="${nu.wdEnd}" placeholder="${isAr?'لـ':'To'}" oninput="updateWizardPreview('${u.id}')">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:10px">
+            <label class="form-label">${isAr?'شيفتات أيام الإجازة — من / لـ':'Day-off shifts — From / To'}</label>
+            <div class="form-row">
+              <input class="form-input" id="nw-westart-${u.id}" type="number" min="0" max="23" value="${nu.weStart}" placeholder="${isAr?'من':'From'}">
+              <input class="form-input" id="nw-weend-${u.id}" type="number" min="1" max="24" value="${nu.weEnd}" placeholder="${isAr?'لـ':'To'}">
+            </div>
+          </div>
+          <div id="nw-preview-${u.id}" style="font-size:11px;color:var(--text2);background:var(--surface);border-radius:8px;padding:8px 10px;line-height:1.8"></div>
+        </div>`;
+    }).join('');
+
+    root.innerHTML=`
+      <div class="overlay" onclick="closeModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-handle"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <h3 style="margin-bottom:0">👤 ${isAr?'بيانات المرحلة الجديدة':'New Phase Details'}</h3>
+            <span style="font-size:11px;color:var(--text3);font-weight:600">${isAr?'خطوة 2 من 3':'Step 2 of 3'}</span>
+          </div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:14px">${isAr?'عدّل بيانات كل موظف للمرحلة الجديدة:':'Update each person\'s info for the new phase:'}</div>
+          ${keepUsers.length===0?`<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">⚠️ ${isAr?'مفيش موظفين هينتقلوا — كلهم بيتأرشفوا':'No users moving — all archiving'}</div>`:''}
+          ${userForms}
+          <div style="margin-top:4px">
+            <label class="form-label">${isAr?'اسم المرحلة الجديدة:':'New phase name:'}</label>
+            <input class="form-input" id="nw-phase-name" value="${_wizardPhase.name}" placeholder="${isAr?'مثلاً: القاهرة - مستشفى جديد':'e.g. Cairo - New Hospital'}">
+          </div>
+          <div style="margin-top:10px">
+            <label class="form-label">${isAr?'تاريخ البداية:':'Start date:'}</label>
+            <input class="form-input" id="nw-phase-date" type="date" value="${_wizardPhase.date}">
+          </div>
+          <div style="display:flex;gap:8px;margin-top:14px">
+            <button class="cancel-btn" style="flex:1;margin-top:0" onclick="_wizardStep=1;renderWizardStep()">← ${isAr?'رجوع':'Back'}</button>
+            <button class="submit-btn" style="flex:2;margin-top:0" onclick="wizardNext()">${isAr?'مراجعة ✓':'Review ✓'}</button>
+          </div>
+          <button class="cancel-btn" onclick="closeModal()" style="margin-top:6px">${t('cancel')}</button>
+        </div>
+      </div>`;
+
+    // init previews
+    keepUsers.forEach(u=>updateWizardPreview(u.id));
+
+  } else if(_wizardStep===3){
+    // Step 3: confirm screen — new design
+    const isAr=lang==='ar';
+    const s=getSettings();
+    const keepUsers=DB.users.filter(u=>_wizardUserFates[u.id]==='keep');
+    const archUsers=DB.users.filter(u=>_wizardUserFates[u.id]==='archive');
+    const phaseName=_wizardPhase.name||(isAr?'بدون اسم':'Unnamed');
+    const phaseDate=_wizardPhase.date;
+    const phaseDateStr=phaseDate?new Date(phaseDate).toLocaleDateString(lang==='ar'?'ar-EG':'en-GB'):'';
+
+    const userSummaryRows=keepUsers.map(u=>{
+      const nu=_wizardNewUsers[u.id]||u;
+      const daily=(nu.salary/s.calcBase).toFixed(0);
+      const wdHrs=nu.wdEnd-nu.wdStart;
+      return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)">
+        <div style="width:28px;height:28px;border-radius:50%;background:${u.color||'#4A9EFF'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">${nu.name.charAt(0)}</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:var(--text)">${nu.name}</div>
+          <div style="font-size:11px;color:var(--text3)">${nu.salary.toLocaleString()} ${s.currency} · ${isAr?'يومية':'daily'} ${daily} · ${wdHrs}${isAr?'س':'h'}</div>
+        </div>
+        <span style="font-size:10px;background:var(--blue-dim);color:var(--blue);padding:3px 7px;border-radius:6px;font-weight:700">${isAr?'ينتقل':'Moving'}</span>
+      </div>`;
+    }).join('');
+
+    const archRows=archUsers.map(u=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)">
+        <div style="width:28px;height:28px;border-radius:50%;background:${u.color||'#4A9EFF'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;opacity:0.5">${u.name.charAt(0)}</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:var(--text2)">${u.name}</div>
+        </div>
+        <span style="font-size:10px;background:var(--surface3);color:var(--text3);padding:3px 7px;border-radius:6px;font-weight:700">${isAr?'أرشيف':'Archived'}</span>
+      </div>`).join('');
+
+    root.innerHTML=`
+      <div class="overlay">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-handle"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <h3 style="margin-bottom:0">✅ ${isAr?'مراجعة وتأكيد':'Review & Confirm'}</h3>
+            <span style="font-size:11px;color:var(--text3);font-weight:600">${isAr?'خطوة 3 من 3':'Step 3 of 3'}</span>
+          </div>
+
+          <!-- old phase -->
+          <div style="background:var(--surface2);border-radius:12px;padding:12px 14px;margin-bottom:10px">
+            <div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:0.7px;text-transform:uppercase;margin-bottom:6px">${isAr?'تُغلق':'Closing'}</div>
+            <div style="font-size:15px;font-weight:700;color:var(--text)">${s.chapterName||(isAr?'المرحلة الحالية':'Current Phase')}</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">${isAr?'تُحفظ في الأرشيف':'Saved to archive'}</div>
+          </div>
+
+          <!-- arrow -->
+          <div style="text-align:center;font-size:18px;margin:6px 0;color:var(--text3)">↓</div>
+
+          <!-- new phase -->
+          <div style="background:linear-gradient(135deg,rgba(74,158,255,0.13),rgba(76,175,125,0.08));border:1px solid rgba(74,158,255,0.3);border-radius:12px;padding:12px 14px;margin-bottom:12px">
+            <div style="font-size:10px;font-weight:700;color:var(--blue);letter-spacing:0.7px;text-transform:uppercase;margin-bottom:6px">${isAr?'تبدأ':'Starting'}</div>
+            <div style="font-size:15px;font-weight:700;color:var(--text)">${phaseName}</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:2px">📅 ${phaseDateStr}</div>
+          </div>
+
+          <!-- users -->
+          <div style="background:var(--surface2);border-radius:12px;padding:2px 12px 4px;margin-bottom:14px">
+            ${userSummaryRows}
+            ${archRows}
+          </div>
+
+          <button class="submit-btn" onclick="executeCloseChapter()">🚀 ${isAr?'تأكيد وبدء المرحلة الجديدة':'Confirm & Start New Phase'}</button>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="cancel-btn" style="flex:1;margin-top:0" onclick="_wizardStep=2;renderWizardStep()">← ${isAr?'تعديل':'Edit'}</button>
+            <button class="cancel-btn" style="flex:1;margin-top:0" onclick="_pendingChapterClose=null;closeModal()">${t('cancel')}</button>
+          </div>
+        </div>
+      </div>`;
+  }
+}
+
+function setWizardFate(uid,fate){
+  _wizardUserFates[uid]=fate;
+  renderWizardStep();
+}
+
+function updateWizardPreview(uid){
+  const salary=parseFloat(document.getElementById('nw-salary-'+uid)?.value)||0;
+  const wdStart=parseInt(document.getElementById('nw-wdstart-'+uid)?.value)||0;
+  const wdEnd=parseInt(document.getElementById('nw-wdend-'+uid)?.value)||0;
+  const s=getSettings();
+  const el=document.getElementById('nw-preview-'+uid);
+  if(!el) return;
+  if(!salary||wdEnd<=wdStart){el.textContent='';return;}
+  const daily=(salary/s.calcBase).toFixed(0);
+  const hrs=wdEnd-wdStart;
+  const hourly=(salary/(s.calcBase*hrs)).toFixed(2);
+  const isAr=lang==='ar';
+  el.innerHTML=`${isAr?'اليومية':'Daily'}: <b>${daily}</b> · ${isAr?'الساعة':'Hourly'}: <b>${hourly}</b> · ${isAr?'ساعات الشيفت':'Shift hrs'}: <b>${hrs}</b>`;
+}
+
+function wizardNext(){
+  const isAr=lang==='ar';
+  if(_wizardStep===1){
+    _wizardStep=2;
+    renderWizardStep();
+  } else if(_wizardStep===2){
+    // collect user data
+    const keepUsers=DB.users.filter(u=>_wizardUserFates[u.id]==='keep');
+    let valid=true;
+    keepUsers.forEach(u=>{
+      const name=document.getElementById('nw-name-'+u.id)?.value?.trim()||'';
+      const salary=parseFloat(document.getElementById('nw-salary-'+u.id)?.value)||0;
+      const offDay=parseInt(document.getElementById('nw-offday-'+u.id)?.value);
+      const wdStart=parseInt(document.getElementById('nw-wdstart-'+u.id)?.value)||0;
+      const wdEnd=parseInt(document.getElementById('nw-wdend-'+u.id)?.value)||0;
+      const weStart=parseInt(document.getElementById('nw-westart-'+u.id)?.value)||0;
+      const weEnd=parseInt(document.getElementById('nw-weend-'+u.id)?.value)||0;
+      if(!name||!salary||wdEnd<=wdStart){valid=false;return;}
+      _wizardNewUsers[u.id]={name,salary,offDay,wdStart,wdEnd,weStart,weEnd};
+    });
+    if(!valid){alert(isAr?'تأكد من بيانات كل موظف (اسم، مرتب، وساعات الشيفت)':'Check all user info — name, salary and shift hours');return;}
+    const phaseName=document.getElementById('nw-phase-name')?.value?.trim()||'';
+    const phaseDate=document.getElementById('nw-phase-date')?.value;
+    if(!phaseDate){alert(isAr?'اختار تاريخ للمرحلة الجديدة':'Choose a start date');return;}
+    _wizardPhase={name:phaseName,date:phaseDate};
+
+    // build pending snapshot
+    const s=getSettings();
+    const archiveUserIds=DB.users.filter(u=>_wizardUserFates[u.id]==='archive').map(u=>u.id);
+    _pendingChapterClose={
+      newName:phaseName,
+      newDate:phaseDate,
+      keepUserIds:DB.users.filter(u=>_wizardUserFates[u.id]==='keep').map(u=>u.id),
+      archiveUserIds,
+      newUserData:_wizardNewUsers,
+      snapshot:{
+        id:'ch_'+Date.now(),
+        name:s.chapterName||'',
+        startDate:s.startDate,
+        endDate:new Date().toISOString().split('T')[0],
+        users:DB.users.map(u=>({...u})),
+        archivedUserIds:archiveUserIds,
+      }
+    };
+    _wizardStep=3;
+    renderWizardStep();
+  }
+}
+
+function executeCloseChapter(){
+  const isAr=lang==='ar';
+  if(!_pendingChapterClose) return;
+  const {newName,newDate,keepUserIds,archiveUserIds,newUserData,snapshot}=_pendingChapterClose;
+  _pendingChapterClose=null;
+
+  // write archive
   if(!DB.chapters) DB.chapters=[];
-  DB.chapters.push(archivedChapter);
+  DB.chapters.push(snapshot);
 
-  // archive users who should not carry over
-  const keepUserIds=DB.users.filter(u=>userFates[u.id]==='keep').map(u=>u.id);
-
-  // show confirm screen
-  const keptNames=DB.users.filter(u=>keepUserIds.includes(u.id)).map(u=>u.name);
-  const archNames=DB.users.filter(u=>!keepUserIds.includes(u.id)).map(u=>u.name);
-
-  document.getElementById('modal-root').innerHTML=`
-    <div class="overlay">
-      <div class="modal" onclick="event.stopPropagation()">
-        <div class="modal-handle"></div>
-        <h3>📋 ${isAr?'تأكيد الإنهاء':'Confirm Close'}</h3>
-        <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px;font-size:13px;line-height:2">
-          <div>📍 ${isAr?'المرحلة الحالية ستُغلق:':'Current phase will close:'} <b>${s.chapterName||(isAr?'بدون اسم':'Unnamed')}</b></div>
-          <div>🆕 ${isAr?'مرحلة جديدة:':'New phase:'} <b>${newName||(isAr?'بدون اسم':'Unnamed')}</b></div>
-          ${keptNames.length?`<div>✅ ${isAr?'ينتقلون للجديدة:':'Moving to new:'} <b>${keptNames.join('، ')}</b></div>`:''}
-          ${archNames.length?`<div>📦 ${isAr?'يتأرشفون:':'Archiving:'} <b>${archNames.join('، ')}</b></div>`:''}
-        </div>
-        <button class="submit-btn" onclick="executeCloseChapter('${newName}','${newDate}',${JSON.stringify(keepUserIds).replace(/"/g,"'")})">${isAr?'✅ تأكيد':'✅ Confirm'}</button>
-        <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
-      </div>
-    </div>`;
-}
-
-function executeCloseChapter(newName,newDate,keepUserIdsStr){
-  const isAr=lang==='ar';
-  // keepUserIds comes in as JSON-like string from onclick — re-read from live chapter data
-  const lastChapter=DB.chapters[DB.chapters.length-1];
-  const archivedIds=lastChapter.archivedUserIds||[];
-
-  // remove archived users from active list
-  DB.users=DB.users.filter(u=>!archivedIds.includes(u.id));
+  // apply new user data to kept users
+  DB.users=DB.users.filter(u=>!archiveUserIds.includes(u.id));
+  DB.users.forEach(u=>{
+    const nd=newUserData[u.id];
+    if(nd){u.name=nd.name;u.salary=nd.salary;u.offDay=nd.offDay;u.wdStart=nd.wdStart;u.wdEnd=nd.wdEnd;u.weStart=nd.weStart;u.weEnd=nd.weEnd;}
+  });
 
   // update settings for new chapter
   DB.settings.chapterName=newName;
@@ -2446,8 +2712,9 @@ function executeCloseChapter(newName,newDate,keepUserIdsStr){
   saveDB();
   closeModal();
   renderSettings();
+  renderUsers();
   render();
-  showToastMsg(isAr?'✅ تم إنهاء المرحلة وبدء جديدة':'✅ Phase closed — new phase started');
+  showToastMsg(isAr?'🚀 تم إنهاء المرحلة وبدء جديدة':'🚀 Phase closed — new phase started');
 }
 
 function openReopenChapterModal(chapterIdx){
