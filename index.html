@@ -307,6 +307,94 @@ body.en .settings-input-inline{text-align:right;}
 .backup-btn.restore{background:var(--surface2);color:var(--text2);border:0.5px solid var(--border2);}
 .backup-btn.danger{background:var(--red-dim);color:var(--red);border:0.5px solid rgba(255,107,107,0.25);}
 .last-backup{font-size:11px;color:var(--text3);text-align:center;margin-top:8px;}
+
+/* ============================================================
+   SUMMARY PAGE
+   ============================================================ */
+.sum-hero{
+  margin:0 12px 14px;
+  background:linear-gradient(135deg,rgba(74,158,255,0.13) 0%,rgba(181,123,255,0.08) 100%);
+  border:1px solid rgba(74,158,255,0.22);
+  border-radius:18px;
+  padding:20px 18px 18px;
+  position:relative;
+  overflow:hidden;
+}
+.sum-hero::before{
+  content:'';
+  position:absolute;
+  top:-30px;right:-30px;
+  width:120px;height:120px;
+  background:radial-gradient(circle,rgba(74,158,255,0.18),transparent 70%);
+  pointer-events:none;
+}
+.sum-hero-eyebrow{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--blue);margin-bottom:6px;}
+.sum-hero-val{font-size:38px;font-weight:700;color:var(--text);line-height:1;margin-bottom:6px;}
+.sum-hero-sub{font-size:12px;color:var(--text2);line-height:1.6;}
+.sum-hero-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  margin-top:10px;
+  padding:5px 10px;
+  border-radius:20px;
+  font-size:12px;font-weight:600;
+}
+.sum-hero-badge.up{background:var(--green-dim);color:var(--green);}
+.sum-hero-badge.down{background:var(--red-dim);color:var(--red);}
+.sum-hero-badge.neutral{background:var(--surface2);color:var(--text2);}
+
+.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 12px 14px;}
+.sum-tile{background:var(--surface2);border-radius:var(--radius);padding:14px;border:1px solid var(--border2);}
+.sum-tile.full{grid-column:1/-1;}
+.sum-tile-icon{font-size:18px;margin-bottom:6px;}
+.sum-tile-label{font-size:11px;color:var(--text2);margin-bottom:3px;}
+.sum-tile-val{font-size:22px;font-weight:700;color:var(--text);}
+.sum-tile-val.blue{color:var(--blue);}
+.sum-tile-val.green{color:var(--green);}
+.sum-tile-val.amber{color:var(--amber);}
+.sum-tile-val.red{color:var(--red);}
+.sum-tile-sub{font-size:11px;color:var(--text3);margin-top:3px;}
+
+.sum-section-title{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:0.9px;text-transform:uppercase;margin:0 14px 8px;}
+
+.sum-insight{
+  margin:0 12px 14px;
+  background:var(--surface2);
+  border-radius:var(--radius);
+  border:1px solid var(--border2);
+  padding:14px 16px;
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+}
+.sum-insight-icon{font-size:22px;flex-shrink:0;margin-top:2px;}
+.sum-insight-body{}
+.sum-insight-label{font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--blue);margin-bottom:4px;}
+.sum-insight-text{font-size:13px;color:var(--text);line-height:1.6;font-weight:500;}
+
+.sum-progress-wrap{margin:0 12px 14px;}
+.sum-progress-card{background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border2);padding:14px 16px;}
+.sum-progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.sum-progress-label{font-size:13px;font-weight:600;color:var(--text);}
+.sum-progress-pct{font-size:13px;font-weight:700;color:var(--blue);}
+.sum-progress-track{background:var(--surface3);border-radius:6px;height:10px;overflow:hidden;}
+.sum-progress-fill{height:100%;border-radius:6px;transition:width 0.7s cubic-bezier(.2,.8,.2,1);}
+.sum-progress-sub{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:6px;}
+
+.sum-breakdown{margin:0 12px 14px;}
+.sum-breakdown-card{background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border2);overflow:hidden;}
+.sum-breakdown-row{display:flex;align-items:center;padding:12px 16px;border-bottom:0.5px solid var(--border);}
+.sum-breakdown-row:last-child{border-bottom:none;}
+.sum-breakdown-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-left:10px;}
+body.en .sum-breakdown-dot{margin-left:0;margin-right:10px;}
+.sum-breakdown-name{flex:1;font-size:13px;color:var(--text);}
+.sum-breakdown-count{font-size:13px;font-weight:700;color:var(--text);margin-left:10px;}
+body.en .sum-breakdown-count{margin-left:0;margin-right:10px;}
+.sum-breakdown-bonus{font-size:12px;font-weight:600;color:var(--green);}
+
+.sum-empty{text-align:center;padding:60px 20px;color:var(--text3);}
+.sum-empty-icon{font-size:48px;margin-bottom:14px;}
+.sum-empty-title{font-size:15px;font-weight:600;color:var(--text2);margin-bottom:6px;}
+.sum-empty-sub{font-size:13px;line-height:1.6;}
 </style>
 </head>
 <body>
@@ -388,10 +476,10 @@ body.en .settings-input-inline{text-align:right;}
   </button>
 </div>
 
-<!-- ANALYTICS PAGE -->
+<!-- SUMMARY PAGE -->
 <div class="page" id="page-analytics">
   <div class="topbar">
-    <div><h1 id="analytics-title">تحليلات</h1><p id="analytics-sub"></p></div>
+    <div><h1 id="analytics-title">ملخص</h1><p id="analytics-sub"></p></div>
     <div class="topbar-right">
       <button class="lang-btn" onclick="toggleLang()">EN</button>
       <div class="user-switcher" onclick="openUserSwitch()">
@@ -401,7 +489,7 @@ body.en .settings-input-inline{text-align:right;}
       </div>
     </div>
   </div>
-  <div id="analytics-content" style="padding:0 12px 12px"></div>
+  <div id="analytics-content"></div>
 </div>
 
 <!-- SETTINGS PAGE -->
@@ -606,8 +694,8 @@ body.en .settings-input-inline{text-align:right;}
     <span id="nav-lbl-leave">الإجازات</span>
   </div>
   <div class="nav-item" id="nav-analytics" onclick="showPage('analytics')">
-    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-    <span id="nav-lbl-analytics">تحليلات</span>
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    <span id="nav-lbl-analytics">ملخص</span>
   </div>
   <div class="nav-item" id="nav-settings" onclick="showPage('settings')">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -649,7 +737,7 @@ const T={
     offNightDays:'بليل يوم إجازة',offFullDays:'صبح+بليل يوم إجازة',totalBonusH:'إجمالي الزيادة',
     leaveDeductH:'أيام إجازة مخصومة',monthTotalH:'إجمالي الشهر',netAfterH:'الصافي بعد السلف',
     reportFor:'تقرير',reportSalary:'مرتب',day:'يوم',leave2:'إجازة',
-    analytics:'تحليلات',settings:'الإعدادات',
+    analytics:'ملخص',settings:'الإعدادات',
     confirmDelete:'هتحذف المستخدم ده وكل بياناته؟',checkData:'تأكد من البيانات'
   },
   en:{
@@ -680,7 +768,7 @@ const T={
     offNightDays:'Night shift day off',offFullDays:'Mor+Night day off',totalBonusH:'Total Bonus',
     leaveDeductH:'Leave days deducted',monthTotalH:'Month Total',netAfterH:'Net After Advances',
     reportFor:'Report',reportSalary:'Salary',day:'day',leave2:'Leave',
-    analytics:'Analytics',settings:'Settings',
+    analytics:'Summary',settings:'Settings',
     confirmDelete:'Delete this user and all their data?',checkData:'Check data — something is wrong'
   }
 };
@@ -725,7 +813,7 @@ function updateAllLabels(){
   const leaveTitle2=document.querySelector('#page-leave .topbar h1');
   if(leaveTitle2) leaveTitle2.textContent=t('leave');
   const analyticsTitle=document.getElementById('analytics-title');
-  if(analyticsTitle) analyticsTitle.textContent=t('analytics');
+  if(analyticsTitle) analyticsTitle.textContent=lang==='ar'?'ملخص':t('analytics');
   const settingsTitle=document.getElementById('settings-title');
   if(settingsTitle) settingsTitle.textContent=t('settings');
 }
@@ -1679,176 +1767,220 @@ function deleteUser(id){
   saveDB();closeModal();renderUsers();updateTopbars();render();
 }
 
-// ANALYTICS
+// SUMMARY (previously Analytics)
 function renderAnalytics(){
   updateTopbars();
   const u=curUser();
   const c=userCalc(u);
+  const us=getUserSettings(u);
   const el=document.getElementById('analytics-content');
   const isAr=lang==='ar';
+  const now=new Date();
+  const curY=now.getFullYear(),curM=now.getMonth();
 
-  // Gather all months data
+  // ── Gather ALL months data ──────────────────────────────────────
   const months={};
   const prefix=u.id+'|';
   Object.keys(DB.shifts).forEach(k=>{
     if(!k.startsWith(prefix)) return;
     const parts=k.split('|')[1].split('-');
     const mk=`${parts[0]}-${parts[1]}`;
-    if(!months[mk]) months[mk]={bonus:0,deduct:0,nights:0,fulls:0,offNights:0,offFulls:0,leaveDays:0,totalShifts:0};
+    if(!months[mk]) months[mk]={bonus:0,deduct:0,leaveDays:0,totalShifts:0,shiftCounts:{}};
     const v=DB.shifts[k];
     if(v==='leave'){months[mk].leaveDays++;months[mk].deduct+=c.daily;}
-    else if(v==='night'){months[mk].nights++;months[mk].bonus+=0;months[mk].totalShifts++;}
-    else if(v==='full'){months[mk].fulls++;months[mk].bonus+=c.fullBonus;months[mk].totalShifts++;}
-    else if(v==='off-night'){months[mk].offNights++;months[mk].bonus+=c.offNightBonus;months[mk].totalShifts++;}
-    else if(v==='off-full'){months[mk].offFulls++;months[mk].bonus+=c.offFullBonus;months[mk].totalShifts++;}
+    else if(v&&v!=='none'){
+      const bonus=getBonus(u,v);
+      months[mk].bonus+=bonus;
+      months[mk].totalShifts++;
+      months[mk].shiftCounts[v]=(months[mk].shiftCounts[v]||0)+1;
+    }
+    // extra deductions
+    months[mk].deduct+=getShiftDeduction(k,c.daily);
   });
 
   const mkKeys=Object.keys(months).sort();
+
+  // ── No data state ───────────────────────────────────────────────
   if(!mkKeys.length){
-    el.innerHTML=`<div class="an-empty"><div>📊</div>${isAr?'مفيش بيانات لحد دلوقتي':'No data yet'}<br><span style="font-size:12px;color:var(--text3)">${isAr?'ابدأ بتسجيل الشيفتات':'Start logging shifts'}</span></div>`;
+    el.innerHTML=`
+      <div class="sum-empty">
+        <div class="sum-empty-icon">📋</div>
+        <div class="sum-empty-title">${isAr?'مفيش بيانات لحد دلوقتي':'No data yet'}</div>
+        <div class="sum-empty-sub">${isAr?'ابدأ بتسجيل الشيفتات من التقويم\nوالملخص هيظهر هنا':'Start logging shifts from the calendar\nand the summary will appear here'}</div>
+      </div>`;
     return;
   }
 
-  // Calculate totals per month
-  const monthTotals=mkKeys.map(mk=>{
-    const d=months[mk];
-    const adv=getTotalAdvance(u.id,parseInt(mk.split('-')[0]),parseInt(mk.split('-')[1])-1);
-    return {mk,net:u.salary+d.bonus-d.deduct-adv,...d,adv};
+  // ── Current month data ──────────────────────────────────────────
+  const curMk=`${curY}-${String(curM+1).padStart(2,'0')}`;
+  const curData=months[curMk]||{bonus:0,deduct:0,leaveDays:0,totalShifts:0,shiftCounts:{}};
+  const curAdv=getTotalAdvance(u.id,curY,curM);
+  const curNet=u.salary+curData.bonus-curData.deduct-curAdv;
+
+  // ── Previous month data ─────────────────────────────────────────
+  let prevY=curY,prevM=curM-1;if(prevM<0){prevM=11;prevY--;}
+  const prevMk=`${prevY}-${String(prevM+1).padStart(2,'0')}`;
+  const prevData=months[prevMk];
+  const prevAdv=prevData?getTotalAdvance(u.id,prevY,prevM):0;
+  const prevNet=prevData?u.salary+prevData.bonus-prevData.deduct-prevAdv:null;
+  const diffNet=prevNet!==null?curNet-prevNet:null;
+
+  // ── Month progress ──────────────────────────────────────────────
+  const dayOfMonth=now.getDate();
+  const daysInMonth=new Date(curY,curM+1,0).getDate();
+  const monthPct=Math.round((dayOfMonth/daysInMonth)*100);
+
+  // ── Insight: find busiest weekday this month ────────────────────
+  const dayCounts=[0,0,0,0,0,0,0];
+  const dayNames=T[lang].days;
+  const shiftKeys=Object.keys(DB.shifts).filter(k=>k.startsWith(prefix+curMk.slice(0,4)+'-'+curMk.slice(5,7)));
+  shiftKeys.forEach(k=>{
+    const v=DB.shifts[k];
+    if(!v||v==='none'||v==='leave') return;
+    const parts=k.split('|')[1].split('-');
+    const d=new Date(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2]));
+    dayCounts[d.getDay()]++;
   });
-
-  const allNets=monthTotals.map(m=>m.net);
-  const avgNet=allNets.reduce((a,b)=>a+b,0)/allNets.length;
-  const maxNet=Math.max(...allNets);
-  const maxMk=monthTotals.find(m=>m.net===maxNet)?.mk||'';
-  const [maxY,maxM]=maxMk.split('-');
-
-  const allBonus=monthTotals.map(m=>m.bonus);
-  const avgBonus=allBonus.reduce((a,b)=>a+b,0)/allBonus.length;
-  const totalShiftsAll=monthTotals.reduce((a,m)=>a+m.totalShifts,0);
-  const totalLeaveDays=monthTotals.reduce((a,m)=>a+m.leaveDays,0);
-  const totalMonths=mkKeys.length;
-
-  // Current month prediction
-  const todayD=new Date();
-  const curMk=`${todayD.getFullYear()}-${String(todayD.getMonth()+1).padStart(2,'0')}`;
-  const curData=months[curMk];
-  const dayOfMonth=todayD.getDate();
-  const daysInMonth=new Date(todayD.getFullYear(),todayD.getMonth()+1,0).getDate();
-  let predictedNet=u.salary;
-  if(curData&&dayOfMonth>1){
-    const dailyRate=(curData.bonus-curData.deduct)/dayOfMonth;
-    const curAdv=getTotalAdvance(u.id,todayD.getFullYear(),todayD.getMonth());
-    predictedNet=u.salary+(dailyRate*daysInMonth)-curAdv;
+  const maxDayCount=Math.max(...dayCounts);
+  let insightText='';
+  if(maxDayCount>0){
+    const busiestDay=dayCounts.indexOf(maxDayCount);
+    insightText=isAr
+      ?`أكثر يوم عليك شيفت الشهر ده: ${dayNames[busiestDay]} (${maxDayCount} مرة)`
+      :`Your busiest day this month: ${dayNames[busiestDay]} (${maxDayCount} shifts)`;
+  } else {
+    insightText=isAr?'مفيش شيفتات مسجلة الشهر ده لحد دلوقتي':'No shifts logged this month yet';
   }
 
-  // Chart data — last 6 months
-  const last6=monthTotals.slice(-6);
-  const maxBar=Math.max(...last6.map(m=>m.net),u.salary);
+  // ── Shift breakdown for current month ──────────────────────────
+  const shiftTypes=us.shiftTypes||[];
+  const breakdownRows=shiftTypes.map(st=>{
+    const cnt=curData.shiftCounts[st.id]||0;
+    if(!cnt) return null;
+    const bonus=calcBonusForShift(u,st.id)*cnt;
+    const clr=st.id==='night'?'var(--blue)':st.id==='full'?'var(--green)':st.id==='off-night'?'var(--amber)':'var(--red)';
+    const name=isAr?st.nameAr:st.nameEn;
+    return {name,cnt,bonus,clr};
+  }).filter(Boolean);
 
-  // Streak calculation
-  let streak=0,maxStreak=0,tempStreak=0;
-  const today=new Date();
-  const todayKey=`${u.id}|${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-  // count consecutive worked days backwards
-  for(let i=0;i<60;i++){
-    const d2=new Date(today);d2.setDate(today.getDate()-i);
-    const k2=`${u.id}|${d2.getFullYear()}-${String(d2.getMonth()+1).padStart(2,'0')}-${String(d2.getDate()).padStart(2,'0')}`;
-    const v=DB.shifts[k2];
-    if(v&&v!=='none'&&v!=='leave'){if(i===0||streak>0) streak++; tempStreak++;}
-    else{if(tempStreak>maxStreak) maxStreak=tempStreak; tempStreak=0; if(streak>0) break;}
+  // ── Commitment rate ─────────────────────────────────────────────
+  const expectedShifts=dayOfMonth; // rough: one shift per worked day possible
+  const commitRate=expectedShifts>0?Math.min(Math.round((curData.totalShifts/expectedShifts)*100),100):0;
+
+  // ── Hero badge ──────────────────────────────────────────────────
+  let badgeHtml='';
+  if(diffNet!==null){
+    const sign=diffNet>=0?'+':'';
+    const cls=diffNet>=0?'up':'down';
+    const arrow=diffNet>=0?'↑':'↓';
+    badgeHtml=`<div class="sum-hero-badge ${cls}">${arrow} ${sign}${Math.round(diffNet).toLocaleString()} ${isAr?'عن الشهر اللي فات':'vs last month'}</div>`;
   }
-  if(tempStreak>maxStreak) maxStreak=tempStreak;
 
+  // ── Render ──────────────────────────────────────────────────────
   el.innerHTML=`
-    <!-- PREDICTION -->
-    <div class="an-prediction">
-      <h4>🔮 ${isAr?'توقع آخر الشهر':'Month Prediction'}</h4>
-      <div class="an-prediction-val">${predictedNet.toFixed(0)} ${isAr?'ج':'EGP'}</div>
-      <div class="an-prediction-sub">${isAr?`بناءً على ${dayOfMonth} يوم من الشهر ده`:`Based on ${dayOfMonth} days this month`}</div>
+
+    <!-- HERO: This month total -->
+    <div class="sum-hero">
+      <div class="sum-hero-eyebrow">${isAr?'صافي الشهر الحالي':'This Month Net'} — ${T[lang].months[curM]}</div>
+      <div class="sum-hero-val" id="sum-anim-net">${Math.round(curNet).toLocaleString()}</div>
+      <div class="sum-hero-sub">${isAr?`المرتب الأساسي: ${u.salary.toLocaleString()} + زيادة: +${Math.round(curData.bonus)} − خصومات: −${Math.round(curData.deduct+curAdv)}`:`Base: ${u.salary.toLocaleString()} + Bonus: +${Math.round(curData.bonus)} − Deductions: −${Math.round(curData.deduct+curAdv)}`}</div>
+      ${badgeHtml}
     </div>
 
-    <!-- OVERVIEW -->
-    <div class="an-section">
-      <div class="an-section-title">${isAr?'إجمالي':'Overview'}</div>
-      <div class="an-cards">
-        <div class="an-card highlight">
-          <div class="an-label">${isAr?'متوسط الشهر':'Avg Month'}</div>
-          <div class="an-val blue">${avgNet.toFixed(0)}</div>
-          <div class="an-sub">${isAr?`على ${totalMonths} شهر`:`over ${totalMonths} months`}</div>
+    <!-- TILES ROW 1 -->
+    <div class="sum-grid">
+      <div class="sum-tile">
+        <div class="sum-tile-icon">📅</div>
+        <div class="sum-tile-label">${isAr?'شيفتات الشهر':'Shifts This Month'}</div>
+        <div class="sum-tile-val blue">${curData.totalShifts}</div>
+        <div class="sum-tile-sub">${prevData?`${isAr?'الشهر اللي فات:':'Last month:'} ${prevData.totalShifts}`:''}</div>
+      </div>
+      <div class="sum-tile">
+        <div class="sum-tile-icon">💰</div>
+        <div class="sum-tile-label">${isAr?'إجمالي الزيادة':'Total Bonus'}</div>
+        <div class="sum-tile-val green">+${Math.round(curData.bonus).toLocaleString()}</div>
+        <div class="sum-tile-sub">${isAr?`يومية: ${c.daily.toFixed(0)}`:`Daily rate: ${c.daily.toFixed(0)}`}</div>
+      </div>
+      <div class="sum-tile">
+        <div class="sum-tile-icon">🏖️</div>
+        <div class="sum-tile-label">${isAr?'أيام الإجازة':'Leave Days'}</div>
+        <div class="sum-tile-val ${curData.leaveDays>0?'amber':''}">${curData.leaveDays}</div>
+        <div class="sum-tile-sub">${curData.leaveDays>0?`−${Math.round(curData.deduct).toLocaleString()} ${isAr?'ج':'EGP'}`:isAr?'بدون إجازات':'No leaves'}</div>
+      </div>
+      <div class="sum-tile">
+        <div class="sum-tile-icon">💳</div>
+        <div class="sum-tile-label">${isAr?'السلف':'Advances'}</div>
+        <div class="sum-tile-val ${curAdv>0?'red':''}">${curAdv>0?'−'+Math.round(curAdv).toLocaleString():'0'}</div>
+        <div class="sum-tile-sub">${curAdv>0?isAr?'محسوم من الصافي':'Deducted from net':isAr?'مفيش سلف':'No advances'}</div>
+      </div>
+    </div>
+
+    <!-- DAILY INSIGHT -->
+    <div class="sum-insight">
+      <div class="sum-insight-icon">💡</div>
+      <div class="sum-insight-body">
+        <div class="sum-insight-label">${isAr?'إنسايت اليوم':'Today\'s Insight'}</div>
+        <div class="sum-insight-text">${insightText}</div>
+      </div>
+    </div>
+
+    <!-- MONTH PROGRESS -->
+    <div class="sum-progress-wrap">
+      <div class="sum-progress-card">
+        <div class="sum-progress-header">
+          <span class="sum-progress-label">${isAr?'تقدم الشهر':'Month Progress'}</span>
+          <span class="sum-progress-pct">${monthPct}%</span>
         </div>
-        <div class="an-card highlight-green">
-          <div class="an-label">${isAr?'أعلى شهر':'Best Month'}</div>
-          <div class="an-val green">${maxNet.toFixed(0)}</div>
-          <div class="an-sub">${maxY?T[lang].months[parseInt(maxM)-1]+' '+maxY:'-'}</div>
+        <div class="sum-progress-track">
+          <div class="sum-progress-fill" style="width:${monthPct}%;background:linear-gradient(90deg,var(--blue),var(--purple))"></div>
         </div>
-        <div class="an-card">
-          <div class="an-label">${isAr?'متوسط الزيادة':'Avg Bonus'}</div>
-          <div class="an-val amber">+${avgBonus.toFixed(0)}</div>
-          <div class="an-sub">${isAr?'في الشهر':'per month'}</div>
-        </div>
-        <div class="an-card">
-          <div class="an-label">${isAr?'إجمالي الشيفتات':'Total Shifts'}</div>
-          <div class="an-val">${totalShiftsAll}</div>
-          <div class="an-sub">${isAr?`${totalLeaveDays} يوم إجازة`:`${totalLeaveDays} leave days`}</div>
+        <div class="sum-progress-sub">
+          <span>${isAr?`يوم ${dayOfMonth} من ${daysInMonth}`:`Day ${dayOfMonth} of ${daysInMonth}`}</span>
+          <span>${isAr?`${daysInMonth-dayOfMonth} يوم متبقي`:`${daysInMonth-dayOfMonth} days left`}</span>
         </div>
       </div>
     </div>
 
-    <!-- CHART -->
-    <div class="an-section">
-      <div class="an-section-title">${isAr?'آخر 6 شهور':'Last 6 Months'}</div>
-      <div class="an-card full">
-        <div class="an-chart-bars">
-          ${last6.map(m=>{
-            const [y,mo2]=m.mk.split('-');
-            const pct=Math.max((m.net/maxBar)*100,4);
-            const color=m.net>=u.salary?'var(--green)':'var(--red)';
-            const shortMo=T[lang].months[parseInt(mo2)-1].slice(0,3);
-            return `<div class="an-chart-bar-wrap">
-              <div class="an-chart-bar" style="height:${pct}%;background:${color};opacity:0.85"></div>
-              <div class="an-chart-bar-lbl">${shortMo}</div>
-            </div>`;
-          }).join('')}
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:10px;color:var(--text3)">
-          <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block"></span>${isAr?'فوق الراتب':'Above salary'}</span>
-          <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block"></span>${isAr?'تحت الراتب':'Below salary'}</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- STREAK -->
-    ${streak>1?`<div class="an-section">
-      <div class="an-section-title">${isAr?'تسلسل الشغل':'Work Streak'}</div>
-      <div class="an-streak">
-        <div class="an-streak-icon">🔥</div>
-        <div class="an-streak-text">
-          <h4>${streak} ${isAr?'يوم متتالي':'days in a row'}</h4>
-          <p>${isAr?`أعلى تسلسل: ${maxStreak} يوم`:`Best streak: ${maxStreak} days`}</p>
-        </div>
+    <!-- SHIFT BREAKDOWN -->
+    ${breakdownRows.length?`
+    <div class="sum-section-title">${isAr?'توزيع الشيفتات':'Shift Breakdown'}</div>
+    <div class="sum-breakdown">
+      <div class="sum-breakdown-card">
+        ${breakdownRows.map(r=>`
+        <div class="sum-breakdown-row">
+          <div class="sum-breakdown-dot" style="background:${r.clr}"></div>
+          <div class="sum-breakdown-name">${r.name}</div>
+          <div class="sum-breakdown-count">${r.cnt}</div>
+          <div class="sum-breakdown-bonus">${r.bonus>0?'+'+Math.round(r.bonus):''}</div>
+        </div>`).join('')}
       </div>
     </div>`:''}
 
-    <!-- SHIFT BREAKDOWN -->
-    <div class="an-section">
-      <div class="an-section-title">${isAr?'توزيع الشيفتات':'Shift Breakdown'}</div>
-      <div class="an-card full">
-        ${[
-          {label:isAr?'شيفت بليل عادي':'Night Regular',val:monthTotals.reduce((a,m)=>a+m.nights,0),color:'var(--blue)'},
-          {label:isAr?'صبح + بليل عادي':'Full Regular',val:monthTotals.reduce((a,m)=>a+m.fulls,0),color:'var(--green)'},
-          {label:isAr?'بليل يوم إجازة':'Night Day Off',val:monthTotals.reduce((a,m)=>a+m.offNights,0),color:'var(--amber)'},
-          {label:isAr?'صبح+بليل يوم إجازة':'Full Day Off',val:monthTotals.reduce((a,m)=>a+m.offFulls,0),color:'var(--red)'},
-        ].map(s=>{
-          const pct=totalShiftsAll>0?Math.round((s.val/totalShiftsAll)*100):0;
-          return `<div class="an-bar-wrap">
-            <div class="an-bar-label"><span>${s.label}</span><span style="color:${s.color}">${s.val} (${pct}%)</span></div>
-            <div class="an-bar-track"><div class="an-bar-fill" style="width:${pct}%;background:${s.color}"></div></div>
-          </div>`;
-        }).join('')}
+    <!-- PREVIOUS MONTH CARD -->
+    ${prevNet!==null?`
+    <div class="sum-section-title">${isAr?'الشهر اللي فات':'Previous Month'} — ${T[lang].months[prevM]}</div>
+    <div class="sum-grid" style="margin-top:0">
+      <div class="sum-tile">
+        <div class="sum-tile-label">${isAr?'الصافي':'Net'}</div>
+        <div class="sum-tile-val ${prevNet>=u.salary?'green':'red'}">${Math.round(prevNet).toLocaleString()}</div>
       </div>
-    </div>
+      <div class="sum-tile">
+        <div class="sum-tile-label">${isAr?'الشيفتات':'Shifts'}</div>
+        <div class="sum-tile-val">${prevData.totalShifts}</div>
+        <div class="sum-tile-sub">${prevData.leaveDays} ${isAr?'إجازة':'leave'}</div>
+      </div>
+    </div>`:''}
+
   `;
+
+  // animate hero value
+  setTimeout(()=>{
+    const heroEl=document.getElementById('sum-anim-net');
+    if(heroEl) animateValue(heroEl,curNet);
+  },60);
 }
+
+// ── end renderAnalytics ─────────────────────────────────────────
 
 
 // ANIMATE number value
