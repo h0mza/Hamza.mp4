@@ -413,6 +413,30 @@ body.en .settings-input-inline{text-align:right;}
     </div>
   </div>
 
+  <!-- CURRENT PHASE -->
+  <div style="margin:0 12px 16px">
+    <div id="stg-phase-card" onclick="openChapterEditor()" style="background:linear-gradient(135deg,rgba(74,158,255,0.12),rgba(181,123,255,0.08));border:1px solid rgba(74,158,255,0.25);border-radius:14px;padding:16px;cursor:pointer;transition:all 0.15s;" ontouchstart="this.style.opacity='.7'" ontouchend="this.style.opacity='1'">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--blue);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px" id="stg-phase-eyebrow">المرحلة الحالية</div>
+          <div style="font-size:17px;font-weight:700;color:var(--text)" id="stg-phase-name">—</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:4px" id="stg-phase-date">—</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px rgba(76,175,125,0.6)"></div>
+            <span style="font-size:11px;color:var(--green);font-weight:600" id="stg-phase-active">نشط</span>
+          </div>
+          <button onclick="event.stopPropagation();openCloseChapterWizard()" style="background:rgba(255,107,107,0.12);border:0.5px solid rgba(255,107,107,0.3);color:var(--red);font-size:11px;font-weight:600;padding:5px 10px;border-radius:8px;cursor:pointer;font-family:inherit">
+            🔒 <span id="stg-close-chapter-btn">إنهاء المرحلة</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- ARCHIVED CHAPTERS -->
+    <div id="stg-archived-chapters"></div>
+  </div>
+
   <!-- SALARY CALC METHOD -->
   <div class="settings-section">
     <div class="settings-section-title" id="stg-s1">طريقة حساب المرتب</div>
@@ -517,16 +541,6 @@ body.en .settings-input-inline{text-align:right;}
         </div>
         <div class="settings-row-right">
           <span class="settings-val" id="stg-firstday-val">الأحد</span>
-          <svg class="settings-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-        </div>
-      </div>
-      <div class="settings-row tappable" onclick="openStartDatePicker()">
-        <div class="settings-row-left">
-          <span class="settings-row-label" id="stg-startdate-lbl">تاريخ بداية العمل</span>
-          <span class="settings-row-sub" id="stg-startdate-sub">الأيام قبله مش قابلة للتعديل</span>
-        </div>
-        <div class="settings-row-right">
-          <span class="settings-val" id="stg-startdate-val">—</span>
           <svg class="settings-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
       </div>
@@ -725,6 +739,7 @@ const DEFAULT_SETTINGS={
   roundAmounts:true,
   firstDayOfWeek:0,     // 0=Sun, 6=Sat
   startDate:'2026-05-01', // employment start date (YYYY-MM-DD)
+  chapterName:'',         // current life/work phase label
   confirmOnChange:true,   // ask before changing an existing shift
   // shift bonus formulas: 'none','daily','offnight','offfull','custom'
   shiftBonuses:{
@@ -744,6 +759,8 @@ if(!DB.shifts) DB.shifts={};
 if(!DB.locks) DB.locks={};
 if(!DB.advances) DB.advances={};
 if(!DB.notes) DB.notes={};
+if(!DB.chapters) DB.chapters=[];   // archived chapters
+if(!DB.shiftMeta) DB.shiftMeta={}; // timestamps + deductions per shift key
 if(!DB.settings) DB.settings={...DEFAULT_SETTINGS};
 // merge any missing keys from defaults
 DB.settings={...DEFAULT_SETTINGS,...DB.settings};
@@ -948,15 +965,17 @@ function render(){
 function renderSummary(){
   const u=curUser();const c=userCalc(u);
   const prefix=`${u.id}|${yr}-${String(mo+1).padStart(2,'0')}-`;
-  let bonus=0,count=0,leaveDeduct=0,leaveDays=0;
+  let bonus=0,count=0,leaveDeduct=0,leaveDays=0,extraDeduct=0;
   Object.keys(DB.shifts).forEach(k=>{
     if(!k.startsWith(prefix)) return;
     const v=DB.shifts[k];
     if(v==='leave'){leaveDays++;leaveDeduct+=c.daily;}
     else if(v!=='none'){count++;bonus+=getBonus(u,v);}
+    // extra deductions from shiftMeta
+    extraDeduct+=getShiftDeduction(k,c.daily);
   });
   const adv=getTotalAdvance(u.id,yr,mo);
-  const total=u.salary+bonus-leaveDeduct-adv;
+  const total=u.salary+bonus-leaveDeduct-extraDeduct-adv;
   const locked=isLocked(u.id,yr,mo);
   document.getElementById('summary-grid').innerHTML=`
     <div class="s-card"><div class="s-label">${t('salary')}</div><div class="s-val">${u.salary.toLocaleString()}</div></div>
@@ -964,6 +983,7 @@ function renderSummary(){
     <div class="s-card clickable" onclick="openDetail()"><div class="s-label">${t('totalBonus')}</div><div class="s-val blue" id="anim-bonus">+${bonus.toFixed(0)}</div><div class="s-tap">${t('tapDetails')}</div></div>
     <div class="s-card"><div class="s-label">${t('leaveDeduct')}</div><div class="s-val ${leaveDays>0?'red':''}">-${leaveDeduct.toFixed(0)}</div></div>
     <div class="s-card clickable" onclick="openAdvanceModal()"><div class="s-label">${t('advance')}</div><div class="s-val ${adv>0?'red':''}">-${adv.toFixed(0)}</div><div class="s-tap">${t('tapAdvance')}</div></div>
+    ${extraDeduct>0?`<div class="s-card"><div class="s-label">${lang==='ar'?'خصومات أيام':'Day Deductions'}</div><div class="s-val red">-${extraDeduct.toFixed(0)}</div></div>`:''}
     <div class="s-card wide"><div class="s-label">${t('monthTotal')} ${locked?'🔒':''}</div><div class="s-val ${total>=u.salary?'green':'red'}" id="anim-total">${total.toFixed(0)}</div></div>
   `;
   setTimeout(()=>{
@@ -991,26 +1011,154 @@ function openShift(day){
   const dayName=T[lang].days[new Date(yr,mo,day).getDay()];
   const noteKey=`note|${key(u.id,yr,mo,day)}`;
   const curNote=DB.notes?.[noteKey]||'';
+  const isAr=lang==='ar';
+
+  // timestamps
+  const meta=DB.shiftMeta?.[k];
+  const fmtTime=iso=>{
+    if(!iso) return '—';
+    const d=new Date(iso);
+    return `${d.getDate()} ${T[lang].months[d.getMonth()]} — ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  };
+  const tsHtml=meta?`
+    <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:10px;font-size:11px;color:var(--text2);line-height:1.9">
+      <div>🕐 ${isAr?'سُجِّل':'Logged'}: <span style="color:var(--text)">${fmtTime(meta.createdAt)}</span></div>
+      ${meta.updatedAt&&meta.updatedAt!==meta.createdAt?`<div>✏️ ${isAr?'عُدِّل':'Edited'}: <span style="color:var(--amber)">${fmtTime(meta.updatedAt)}</span></div>`:''}
+    </div>`:'';
+
+  // deduction section
+  const deductMeta=meta?.deduct;
+  const DEDUCT_OPTIONS=[
+    {val:0,    label:isAr?'بدون خصم':'No deduction'},
+    {val:0.25, label:isAr?'ربع يوم (25%)':'Quarter day (25%)'},
+    {val:0.5,  label:isAr?'نص يوم (50%)':'Half day (50%)'},
+    {val:1,    label:isAr?'يوم كامل (100%)':'Full day (100%)'},
+    {val:2,    label:isAr?'يومين (200%)':'Two days (200%)'},
+    {val:-1,   label:isAr?'مبلغ ثابت':'Fixed amount'},
+  ];
+  const curDeduct=deductMeta?.ratio??0;
+  const curFixed=deductMeta?.fixed??0;
+
   document.getElementById('modal-root').innerHTML=`
     <div class="overlay" onclick="closeModal(event)">
       <div class="modal" onclick="event.stopPropagation()">
         <div class="modal-handle"></div>
-        <h3>${day} ${T[lang].months[mo]} — ${offDay?T[lang].days[u.offDay]:'Weekday'}</h3>
+        <h3>${day} ${T[lang].months[mo]} — ${dayName}</h3>
+        ${tsHtml}
         ${SHIFTS.map(s=>`<button class="shift-btn ${cur===s.id?'active':''}" onclick="setShift('${s.id}')">
           <span>${s.label}</span>
           ${s.bonus>0?`<span class="shift-bonus">+${s.bonus.toFixed(0)}</span>`:''}
         </button>`).join('')}
-        <div style="margin-top:12px">
-          <div class="form-label" style="margin-bottom:6px">📝 ${lang==='ar'?'ملاحظة':'Note'}</div>
-          <textarea id="day-note" class="reason-input" rows="2" placeholder="${lang==='ar'?'اكتب ملاحظة عن اليوم ده...':'Write a note about this day...'}">${curNote}</textarea>
-          <button class="submit-btn" style="margin-top:6px;padding:10px;font-size:13px" onclick="saveNote('${noteKey}')">${lang==='ar'?'حفظ الملاحظة':'Save Note'}</button>
+
+        <div style="margin-top:14px;padding-top:12px;border-top:0.5px solid var(--border)">
+          <div class="form-label" style="margin-bottom:8px">✂️ ${isAr?'خصم يوم':'Day Deduction'}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+            ${DEDUCT_OPTIONS.map(o=>`<button
+              class="shift-btn" id="deduct-btn-${o.val===(-1)?'fixed':o.val}"
+              style="flex:1;min-width:calc(50% - 3px);padding:8px 6px;font-size:12px;${curDeduct===o.val&&!(o.val===-1&&curFixed>0)?'background:var(--red-dim);border-color:rgba(255,107,107,0.4);color:var(--red)':''}"
+              onclick="selectDeductOption(${o.val})">${o.label}
+              ${o.val>0?`<span style="font-size:10px;opacity:0.7">-${(o.val*c.daily).toFixed(0)}</span>`:''}
+            </button>`).join('')}
+          </div>
+          <div id="deduct-fixed-row" style="display:${curDeduct===-1?'block':'none'};margin-bottom:8px">
+            <input class="form-input" id="deduct-fixed-input" type="number" placeholder="${isAr?'المبلغ...':'Amount...'}" value="${curFixed||''}">
+          </div>
+          <div id="deduct-preview" style="font-size:12px;color:var(--red);min-height:16px"></div>
+          <button class="submit-btn" style="margin-top:8px;padding:10px;font-size:13px;background:var(--red-dim);color:var(--red);border:0.5px solid rgba(255,107,107,0.3)" onclick="saveDeduction('${k}')">
+            ${isAr?'حفظ الخصم':'Save Deduction'}
+          </button>
+        </div>
+
+        <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid var(--border)">
+          <div class="form-label" style="margin-bottom:6px">📝 ${isAr?'ملاحظة':'Note'}</div>
+          <textarea id="day-note" class="reason-input" rows="2" placeholder="${isAr?'اكتب ملاحظة عن اليوم ده...':'Write a note about this day...'}">${curNote}</textarea>
+          <button class="submit-btn" style="margin-top:6px;padding:10px;font-size:13px" onclick="saveNote('${noteKey}')">${isAr?'حفظ الملاحظة':'Save Note'}</button>
         </div>
         <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
       </div>
     </div>`;
+
+  // init deduct preview
+  updateDeductPreview(c.daily, curDeduct, curFixed);
+  // mark selected
+  if(curDeduct>=0) highlightDeductBtn(curDeduct);
+  else if(curDeduct===-1) highlightDeductBtn('fixed');
 }
 
-function setShift(id){DB.shifts[key(curUser().id,yr,mo,selDay)]=id;saveDB();closeModal();render();}
+// ---- DEDUCTION HELPERS ----
+let _selectedDeductRatio=0; // 0=none, 0.25, 0.5, 1, 2, -1=fixed
+
+function selectDeductOption(val){
+  _selectedDeductRatio=val;
+  highlightDeductBtn(val===-1?'fixed':val);
+  const fixedRow=document.getElementById('deduct-fixed-row');
+  if(fixedRow) fixedRow.style.display=val===-1?'block':'none';
+  const u=curUser();const c=userCalc(u);
+  const fixed=parseFloat(document.getElementById('deduct-fixed-input')?.value)||0;
+  updateDeductPreview(c.daily,val,fixed);
+}
+
+function highlightDeductBtn(val){
+  document.querySelectorAll('[id^="deduct-btn-"]').forEach(b=>{
+    b.style.background='';b.style.borderColor='';b.style.color='';
+  });
+  const btn=document.getElementById('deduct-btn-'+val);
+  if(btn){btn.style.background='var(--red-dim)';btn.style.borderColor='rgba(255,107,107,0.4)';btn.style.color='var(--red)';}
+}
+
+function updateDeductPreview(daily,ratio,fixed){
+  const isAr=lang==='ar';
+  const el=document.getElementById('deduct-preview');
+  if(!el) return;
+  let amt=0;
+  if(ratio===-1) amt=fixed;
+  else amt=daily*ratio;
+  if(amt>0) el.textContent=`${isAr?'سيُخصم:':'Will deduct:'} -${amt.toFixed(0)} ${DB.settings.currency}`;
+  else el.textContent='';
+}
+
+function saveDeduction(shiftKey){
+  const isAr=lang==='ar';
+  if(!DB.shiftMeta) DB.shiftMeta={};
+  if(!DB.shiftMeta[shiftKey]) DB.shiftMeta[shiftKey]={createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+  const ratio=_selectedDeductRatio;
+  const fixed=parseFloat(document.getElementById('deduct-fixed-input')?.value)||0;
+  if(ratio===0){
+    delete DB.shiftMeta[shiftKey].deduct;
+  } else {
+    DB.shiftMeta[shiftKey].deduct={ratio,fixed:ratio===-1?fixed:0};
+  }
+  saveDB();
+  const btn=document.querySelector('#modal-root .submit-btn[onclick^="saveDeduction"]');
+  if(btn){btn.textContent='✅';btn.style.background='var(--green-dim)';btn.style.color='var(--green)';}
+  setTimeout(()=>closeModal(),600);
+  render();
+}
+
+function getShiftDeduction(shiftKey,daily){
+  const meta=DB.shiftMeta?.[shiftKey];
+  if(!meta?.deduct) return 0;
+  const d=meta.deduct;
+  if(d.ratio===-1) return d.fixed||0;
+  return daily*(d.ratio||0);
+}
+
+function setShift(id){
+  const k=key(curUser().id,yr,mo,selDay);
+  const now=new Date().toISOString();
+  if(!DB.shiftMeta) DB.shiftMeta={};
+  const existing=DB.shiftMeta[k];
+  if(id==='none'){
+    // clear meta when shift removed
+    delete DB.shiftMeta[k];
+  } else if(!existing||!existing.createdAt){
+    DB.shiftMeta[k]={createdAt:now,updatedAt:now};
+  } else {
+    DB.shiftMeta[k]={...existing,updatedAt:now};
+  }
+  DB.shifts[k]=id;
+  saveDB();closeModal();render();
+}
 
 function saveNote(noteKey){
   const val=document.getElementById('day-note')?.value?.trim()||'';
@@ -1127,10 +1275,11 @@ function renderHistory(){
     if(!k.startsWith(prefix)) return;
     const parts=k.split('|')[1].split('-');
     const mk=`${parts[0]}-${parts[1]}`;
-    if(!months[mk]) months[mk]={bonus:0,deduct:0,shifts:{night:0,full:0,'off-night':0,'off-full':0},leaveDays:0};
+    if(!months[mk]) months[mk]={bonus:0,deduct:0,extraDeduct:0,shifts:{night:0,full:0,'off-night':0,'off-full':0},leaveDays:0};
     const v=DB.shifts[k];
     if(v==='leave'){months[mk].leaveDays++;months[mk].deduct+=c.daily;}
     else if(v!=='none'){months[mk].shifts[v]=(months[mk].shifts[v]||0)+1;months[mk].bonus+=getBonus(u,v);}
+    months[mk].extraDeduct+=getShiftDeduction(k,c.daily);
   });
   const keys=Object.keys(months).sort().reverse();
   const el=document.getElementById('history-list');
@@ -1140,9 +1289,25 @@ function renderHistory(){
     const mi=parseInt(m)-1;
     const d=months[mk];
     const adv=getTotalAdvance(u.id,parseInt(y),parseInt(m)-1);
-    const total=u.salary+d.bonus-d.deduct;
+    const total=u.salary+d.bonus-d.deduct-d.extraDeduct;
     const net=total-adv;
     const locked=isLocked(u.id,parseInt(y),parseInt(m)-1);
+
+    // timestamps audit log for this month
+    const fmtTs=iso=>{if(!iso)return'—';const dt=new Date(iso);return`${dt.getDate()}/${dt.getMonth()+1} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;};
+    const shiftKeys=Object.keys(DB.shifts).filter(k=>k.startsWith(`${u.id}|${y}-${m}-`)&&DB.shifts[k]!=='none');
+    const tsRows=shiftKeys.sort().map(k=>{
+      const meta=DB.shiftMeta?.[k];
+      if(!meta) return '';
+      const day=parseInt(k.split('|')[1].split('-')[2]);
+      const dt=new Date(parseInt(y),parseInt(m)-1,day);
+      const edited=meta.updatedAt&&meta.updatedAt!==meta.createdAt;
+      return `<div style="font-size:11px;color:var(--text2);padding:4px 0;border-bottom:0.5px solid var(--border);display:flex;justify-content:space-between">
+        <span>${T[lang].days[dt.getDay()]} ${day}</span>
+        <span>🕐 ${fmtTs(meta.createdAt)}${edited?` ✏️ ${fmtTs(meta.updatedAt)}`:''}</span>
+      </div>`;
+    }).filter(Boolean).join('');
+
     return `
     <div class="month-card">
       <div class="month-card-header" onclick="toggleHistory('${mk}')">
@@ -1160,8 +1325,13 @@ function renderHistory(){
         ${(d.shifts['off-full']||0)>0?`<div class="stat-row"><span class="stat-label">${t('offFullDays')}</span><span class="stat-val red">${d.shifts['off-full']} ${t('day')} (+${(d.shifts['off-full']*c.offFullBonus).toFixed(0)})</span></div>`:''}
         <div class="stat-row"><span class="stat-label">${t('totalBonusH')}</span><span class="stat-val blue">+${d.bonus.toFixed(0)}</span></div>
         ${d.leaveDays>0?`<div class="stat-row"><span class="stat-label">${t('leaveDeductH')}</span><span class="stat-val red">-${d.deduct.toFixed(0)} (${d.leaveDays} ${t('day')})</span></div>`:''}
+        ${d.extraDeduct>0?`<div class="stat-row"><span class="stat-label">${lang==='ar'?'خصومات أيام':'Day deductions'}</span><span class="stat-val red">-${d.extraDeduct.toFixed(0)}</span></div>`:''}
         <div class="stat-row"><span class="stat-label">${t('monthTotalH')}</span><span class="stat-val ${total>=u.salary?'green':'red'}">${total.toFixed(0)}</span></div>
         ${adv>0?`<div class="stat-row"><span class="stat-label">${t('advance')}</span><span class="stat-val red">-${adv.toFixed(0)}</span></div><div class="stat-row"><span class="stat-label">${t('netAfterH')}</span><span class="stat-val ${net>=u.salary?'green':'red'}">${net.toFixed(0)}</span></div>`:''}
+        ${tsRows?`<div style="margin-top:10px;padding-top:8px;border-top:0.5px solid var(--border)">
+          <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px">${lang==='ar'?'سجل التعديلات':'Audit Log'}</div>
+          ${tsRows}
+        </div>`:''}
         <div class="action-row">
           <button class="act-btn export" onclick="exportMonth('${u.id}','${mk}',event)">${t('exportTxt')}</button>
           <button class="act-btn" style="background:var(--amber-dim);color:var(--amber);border:0.5px solid rgba(245,166,35,0.3)" onclick="openMonthNotes('${u.id}','${mk}',event)">📝 ${lang==='ar'?'ملاحظات':'Notes'}</button>
@@ -1765,7 +1935,16 @@ function quickTapDay(day){
     if(!confirm(msg)) return;
   }
   // save for undo
-  undoStack={k,prev:cur};
+  undoStack={k,prev:cur,prevMeta:DB.shiftMeta?.[k]};
+  const now=new Date().toISOString();
+  if(!DB.shiftMeta) DB.shiftMeta={};
+  if(next==='none'){
+    delete DB.shiftMeta[k];
+  } else if(!DB.shiftMeta[k]||cur==='none'){
+    DB.shiftMeta[k]={createdAt:now,updatedAt:now};
+  } else {
+    DB.shiftMeta[k]={...DB.shiftMeta[k],updatedAt:now};
+  }
   DB.shifts[k]=next;
   saveDB();render();
   showToast(next,day);
@@ -1796,6 +1975,9 @@ function showToast(shiftId,day){
 function undoShift(){
   if(!undoStack) return;
   DB.shifts[undoStack.k]=undoStack.prev;
+  if(!DB.shiftMeta) DB.shiftMeta={};
+  if(undoStack.prevMeta) DB.shiftMeta[undoStack.k]=undoStack.prevMeta;
+  else delete DB.shiftMeta[undoStack.k];
   saveDB();render();
   undoStack=null;
   const toast=document.getElementById('toast');
@@ -1898,16 +2080,52 @@ function renderSettings(){
   // confirm on change
   const ctog=document.getElementById('stg-confirm-toggle');
   if(ctog) ctog.classList.toggle('on',s.confirmOnChange);
+  // current phase card
+  const phaseNameEl=document.getElementById('stg-phase-name');
+  const phaseDateEl=document.getElementById('stg-phase-date');
+  const phaseEyebrow=document.getElementById('stg-phase-eyebrow');
+  const phaseActive=document.getElementById('stg-phase-active');
+  if(phaseNameEl){
+    phaseNameEl.textContent=s.chapterName||(isAr?'بدون اسم — اضغط لتعديل':'Unnamed phase — tap to edit');
+    phaseNameEl.style.color=s.chapterName?'var(--text)':'var(--text3)';
+  }
+  if(phaseDateEl&&s.startDate){
+    const sd=new Date(s.startDate);
+    const label=isAr?'بدأت: ':'Started: ';
+    phaseDateEl.textContent=label+`${sd.getDate()} ${T[lang].months[sd.getMonth()]} ${sd.getFullYear()}`;
+  }
+  if(phaseEyebrow) phaseEyebrow.textContent=isAr?'المرحلة الحالية':'Current Phase';
+  if(phaseActive) phaseActive.textContent=isAr?'نشط':'Active';
+  // close chapter button label
+  const ccBtn=document.getElementById('stg-close-chapter-btn');
+  if(ccBtn) ccBtn.textContent=isAr?'إنهاء المرحلة':'Close Chapter';
+  // archived chapters
+  const archiveEl=document.getElementById('stg-archived-chapters');
+  if(archiveEl&&DB.chapters&&DB.chapters.length){
+    archiveEl.innerHTML=`
+      <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:0.6px;margin:14px 0 8px;text-transform:uppercase">${isAr?'مراحل سابقة':'Archived Phases'}</div>
+      ${DB.chapters.slice().reverse().map((ch,i)=>{
+        const idx=DB.chapters.length-1-i;
+        const sd=ch.startDate?new Date(ch.startDate):null;
+        const ed=ch.endDate?new Date(ch.endDate):null;
+        const sdStr=sd?`${sd.getDate()} ${T[lang].months[sd.getMonth()]} ${sd.getFullYear()}`:'?';
+        const edStr=ed?`${ed.getDate()} ${T[lang].months[ed.getMonth()]} ${ed.getFullYear()}`:'?';
+        return `<div style="background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:14px;font-weight:600;color:var(--text)">${ch.name||(isAr?'مرحلة بدون اسم':'Unnamed phase')}</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:3px">${sdStr} → ${edStr}</div>
+          </div>
+          <button onclick="openReopenChapterModal(${idx})" style="background:var(--blue-dim);border:0.5px solid rgba(74,158,255,0.3);color:var(--blue);font-size:11px;font-weight:600;padding:5px 10px;border-radius:8px;cursor:pointer;font-family:inherit">
+            ${isAr?'↺ فتح':'↺ Reopen'}
+          </button>
+        </div>`;
+      }).join('')}
+    `;
+  } else if(archiveEl){
+    archiveEl.innerHTML='';
+  }
   // first day
   document.getElementById('stg-firstday-val').textContent=T[lang].days[s.firstDayOfWeek];
-  // start date
-  const sdEl=document.getElementById('stg-startdate-val');
-  if(sdEl){
-    if(s.startDate){
-      const sd=new Date(s.startDate);
-      sdEl.textContent=`${sd.getDate()} ${T[lang].months[sd.getMonth()]} ${sd.getFullYear()}`;
-    } else sdEl.textContent='—';
-  }
   // last backup
   const lb=localStorage.getItem('myshifts_last_backup');
   const lbEl=document.getElementById('stg-last-backup');
@@ -1960,8 +2178,6 @@ function renderSettings(){
     document.getElementById('stg-confirm-sub').textContent='Ask before changing an existing shift';
     document.getElementById('stg-firstday-lbl').textContent='First Day of Week';
     document.getElementById('stg-firstday-sub').textContent='Calendar display order';
-    document.getElementById('stg-startdate-lbl').textContent='Employment Start Date';
-    document.getElementById('stg-startdate-sub').textContent='Days before this date are locked';
     document.getElementById('stg-formula-note').textContent='Bonuses are calculated based on these settings — tap any shift to edit';
     document.getElementById('stg-backup-title').textContent='💾 Save Data';
     document.getElementById('stg-backup-desc').textContent='Save all your shifts and settings to a file. If you clear cache or change devices, open this file to restore everything.';
@@ -2116,7 +2332,188 @@ function setFirstDay(d){
   DB.settings.firstDayOfWeek=d;saveSettings();closeModal();renderSettings();
 }
 
-function openStartDatePicker(){
+// ========================
+// CHAPTER CLOSE WIZARD
+// ========================
+
+function openCloseChapterWizard(){
+  const isAr=lang==='ar';
+  const s=getSettings();
+  const users=DB.users;
+  // build user selection rows
+  const userRows=users.map(u=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:32px;height:32px;border-radius:50%;background:${u.color};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff">${u.name.charAt(0)}</div>
+        <div>
+          <div style="font-size:14px;font-weight:600">${u.name}</div>
+          <div style="font-size:11px;color:var(--text3)">${u.salary.toLocaleString()} ${s.currency}</div>
+        </div>
+      </div>
+      <select id="user-fate-${u.id}" style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:6px 10px;color:var(--text);font-size:12px;font-family:inherit">
+        <option value="keep">${isAr?'ينتقل للجديدة':'Move to new'}</option>
+        <option value="archive">${isAr?'يتأرشف مع القديمة':'Archive with old'}</option>
+      </select>
+    </div>`).join('');
+
+  document.getElementById('modal-root').innerHTML=`
+    <div class="overlay" onclick="closeModal(event)">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <h3>🔒 ${isAr?'إنهاء المرحلة الحالية':'Close Current Phase'}</h3>
+        <div style="background:var(--amber-dim);border:0.5px solid rgba(245,166,35,0.3);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--amber);line-height:1.6">
+          ⚠️ ${isAr?'البيانات القديمة مش هتتمسح — هتتأرشف وتفضل موجودة.':'Old data won\'t be deleted — it will be archived and kept.'}
+        </div>
+        <div style="font-size:12px;font-weight:700;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.6px">${isAr?'مصير كل مستخدم:':'What happens to each user:'}</div>
+        ${userRows}
+        <div style="margin-top:14px">
+          <div class="form-label" style="margin-bottom:6px">${isAr?'اسم المرحلة الجديدة:':'New phase name:'}</div>
+          <input class="form-input" id="new-chapter-name" placeholder="${isAr?'مثلاً: القاهرة - مستشفى جديد':'e.g. Cairo - New Hospital'}">
+          <div class="form-label" style="margin-top:10px;margin-bottom:6px">${isAr?'تاريخ بداية المرحلة الجديدة:':'New phase start date:'}</div>
+          <input class="form-input" id="new-chapter-date" type="date" value="${new Date().toISOString().split('T')[0]}">
+        </div>
+        <button class="submit-btn" style="margin-top:14px" onclick="confirmCloseChapter()">${isAr?'✅ إنهاء وبدء جديد':'✅ Close & Start New'}</button>
+        <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
+      </div>
+    </div>`;
+}
+
+function confirmCloseChapter(){
+  const isAr=lang==='ar';
+  const s=getSettings();
+  const newName=document.getElementById('new-chapter-name')?.value?.trim()||'';
+  const newDate=document.getElementById('new-chapter-date')?.value;
+  if(!newDate){alert(isAr?'اختار تاريخ للمرحلة الجديدة':'Choose a start date');return;}
+
+  // collect user fates
+  const userFates={};
+  DB.users.forEach(u=>{
+    userFates[u.id]=document.getElementById('user-fate-'+u.id)?.value||'keep';
+  });
+
+  // snapshot current chapter into DB.chapters
+  const archivedChapter={
+    id:'ch_'+Date.now(),
+    name:s.chapterName||'',
+    startDate:s.startDate,
+    endDate:new Date().toISOString().split('T')[0],
+    users:DB.users.map(u=>({...u})),
+    archivedUserIds:DB.users.filter(u=>userFates[u.id]==='archive').map(u=>u.id),
+  };
+  if(!DB.chapters) DB.chapters=[];
+  DB.chapters.push(archivedChapter);
+
+  // archive users who should not carry over
+  const keepUserIds=DB.users.filter(u=>userFates[u.id]==='keep').map(u=>u.id);
+
+  // show confirm screen
+  const keptNames=DB.users.filter(u=>keepUserIds.includes(u.id)).map(u=>u.name);
+  const archNames=DB.users.filter(u=>!keepUserIds.includes(u.id)).map(u=>u.name);
+
+  document.getElementById('modal-root').innerHTML=`
+    <div class="overlay">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <h3>📋 ${isAr?'تأكيد الإنهاء':'Confirm Close'}</h3>
+        <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px;font-size:13px;line-height:2">
+          <div>📍 ${isAr?'المرحلة الحالية ستُغلق:':'Current phase will close:'} <b>${s.chapterName||(isAr?'بدون اسم':'Unnamed')}</b></div>
+          <div>🆕 ${isAr?'مرحلة جديدة:':'New phase:'} <b>${newName||(isAr?'بدون اسم':'Unnamed')}</b></div>
+          ${keptNames.length?`<div>✅ ${isAr?'ينتقلون للجديدة:':'Moving to new:'} <b>${keptNames.join('، ')}</b></div>`:''}
+          ${archNames.length?`<div>📦 ${isAr?'يتأرشفون:':'Archiving:'} <b>${archNames.join('، ')}</b></div>`:''}
+        </div>
+        <button class="submit-btn" onclick="executeCloseChapter('${newName}','${newDate}',${JSON.stringify(keepUserIds).replace(/"/g,"'")})">${isAr?'✅ تأكيد':'✅ Confirm'}</button>
+        <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
+      </div>
+    </div>`;
+}
+
+function executeCloseChapter(newName,newDate,keepUserIdsStr){
+  const isAr=lang==='ar';
+  // keepUserIds comes in as JSON-like string from onclick — re-read from live chapter data
+  const lastChapter=DB.chapters[DB.chapters.length-1];
+  const archivedIds=lastChapter.archivedUserIds||[];
+
+  // remove archived users from active list
+  DB.users=DB.users.filter(u=>!archivedIds.includes(u.id));
+
+  // update settings for new chapter
+  DB.settings.chapterName=newName;
+  DB.settings.startDate=newDate;
+
+  if(!DB.users.length) DB.users=[...DEFAULT_USERS];
+  currentUser=DB.users[0].id;
+
+  saveDB();
+  closeModal();
+  renderSettings();
+  render();
+  showToastMsg(isAr?'✅ تم إنهاء المرحلة وبدء جديدة':'✅ Phase closed — new phase started');
+}
+
+function openReopenChapterModal(chapterIdx){
+  const isAr=lang==='ar';
+  const ch=DB.chapters[chapterIdx];
+  if(!ch){return;}
+  const sd=ch.startDate?new Date(ch.startDate):null;
+  const ed=ch.endDate?new Date(ch.endDate):null;
+  const sdStr=sd?`${sd.getDate()} ${T[lang].months[sd.getMonth()]} ${sd.getFullYear()}`:'?';
+  const edStr=ed?`${ed.getDate()} ${T[lang].months[ed.getMonth()]} ${ed.getFullYear()}`:'?';
+
+  document.getElementById('modal-root').innerHTML=`
+    <div class="overlay" onclick="closeModal(event)">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <h3>↺ ${isAr?'فتح مرحلة سابقة':'Reopen Archived Phase'}</h3>
+        <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px;font-size:13px;line-height:2">
+          <div>📍 ${ch.name||(isAr?'بدون اسم':'Unnamed')}</div>
+          <div style="font-size:12px;color:var(--text3)">${sdStr} → ${edStr}</div>
+          <div style="margin-top:6px;font-size:12px;color:var(--amber)">
+            ⚠️ ${isAr?'المرحلة الحالية ستُحفظ كأرشيف وترجع لهذه المرحلة.':'Current phase will be archived and you\'ll switch back to this one.'}
+          </div>
+        </div>
+        <button class="submit-btn" onclick="executeReopenChapter(${chapterIdx})">${isAr?'↺ رجوع لهذه المرحلة':'↺ Switch to this phase'}</button>
+        <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
+      </div>
+    </div>`;
+}
+
+function executeReopenChapter(chapterIdx){
+  const isAr=lang==='ar';
+  const ch=DB.chapters[chapterIdx];
+  if(!ch) return;
+
+  // archive current phase first
+  const s=getSettings();
+  const currentChapterSnapshot={
+    id:'ch_'+Date.now(),
+    name:s.chapterName||'',
+    startDate:s.startDate,
+    endDate:new Date().toISOString().split('T')[0],
+    users:DB.users.map(u=>({...u})),
+    archivedUserIds:[],
+  };
+  // replace the reopened chapter with the current snapshot
+  DB.chapters[chapterIdx]=currentChapterSnapshot;
+
+  // restore archived chapter's settings
+  DB.settings.chapterName=ch.name||'';
+  DB.settings.startDate=ch.startDate||DB.settings.startDate;
+
+  // restore users from archived chapter (merge: add back archived users not already present)
+  if(ch.users&&ch.users.length){
+    const currentIds=new Set(DB.users.map(u=>u.id));
+    ch.users.forEach(u=>{if(!currentIds.has(u.id)) DB.users.push(u);});
+  }
+
+  currentUser=DB.users[0].id;
+  saveDB();
+  closeModal();
+  renderSettings();
+  render();
+  showToastMsg(isAr?`↺ رجعت لمرحلة: ${ch.name||'السابقة'}`:`↺ Switched to: ${ch.name||'previous phase'}`);
+}
+
+function openChapterEditor(){
   const isAr=lang==='ar';
   const s=getSettings();
   const cur=s.startDate||'2026-05-01';
@@ -2124,31 +2521,38 @@ function openStartDatePicker(){
     <div class="overlay" onclick="closeModal(event)">
       <div class="modal" onclick="event.stopPropagation()">
         <div class="modal-handle"></div>
-        <h3>${isAr?'تاريخ بداية العمل':'Employment Start Date'}</h3>
-        <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.6">
-          ${isAr?'الأيام قبل التاريخ ده مش هتقدر تعدلها في التقويم.':'Days before this date will be locked in the calendar.'}
+        <h3>📍 ${isAr?'المرحلة الحالية':'Current Phase'}</h3>
+        <div class="form-group">
+          <label class="form-label">${isAr?'اسم المرحلة (اختياري):':'Phase name (optional):'}</label>
+          <input class="form-input" id="chapter-name-input" placeholder="${isAr?'مثلاً: الإسكندرية - مستشفى النور':'e.g. Alexandria - Job 1'}" value="${s.chapterName||''}">
         </div>
         <div class="form-group">
-          <label class="form-label">${isAr?'التاريخ:':'Date:'}</label>
+          <label class="form-label">${isAr?'تاريخ البداية:':'Start date:'}</label>
           <input class="form-input" id="startdate-input" type="date" value="${cur}">
         </div>
-        <button class="submit-btn" onclick="saveStartDate()">${isAr?'حفظ':'Save'}</button>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.6;background:var(--surface2);padding:10px 12px;border-radius:var(--radius-sm)">
+          💡 ${isAr?'الأيام قبل تاريخ البداية مش قابلة للتعديل في التقويم.':'Days before the start date are locked in the calendar.'}
+        </div>
+        <button class="submit-btn" onclick="saveChapter()">${isAr?'حفظ':'Save'}</button>
         <button class="cancel-btn" onclick="closeModal()">${t('cancel')}</button>
       </div>
     </div>`;
 }
 
-function saveStartDate(){
-  const val=document.getElementById('startdate-input')?.value;
-  if(!val) return;
-  const d=new Date(val);
-  if(isNaN(d)){alert(lang==='ar'?'تاريخ غلط':'Invalid date');return;}
-  DB.settings.startDate=val;
+function saveChapter(){
+  const isAr=lang==='ar';
+  const nameVal=document.getElementById('chapter-name-input')?.value?.trim()||'';
+  const dateVal=document.getElementById('startdate-input')?.value;
+  if(!dateVal){return;}
+  const d=new Date(dateVal);
+  if(isNaN(d)){alert(isAr?'تاريخ غلط':'Invalid date');return;}
+  DB.settings.chapterName=nameVal;
+  DB.settings.startDate=dateVal;
   saveSettings();
   closeModal();
   renderSettings();
   render();
-  showToastMsg(lang==='ar'?'✅ تم حفظ تاريخ البداية':'✅ Start date saved');
+  showToastMsg(isAr?'✅ تم حفظ المرحلة':'✅ Phase saved');
 }
 
 function openShiftBonusEditor(shiftId){
