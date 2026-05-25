@@ -8,6 +8,10 @@ self.addEventListener('activate', e => {
   e.waitUntil(clients.claim());
 });
 
+self.addEventListener('fetch', e => {
+  e.respondWith(fetch(e.request));
+});
+
 self.addEventListener('periodicsync', e => {
   if (e.tag === 'shift-reminder') {
     e.waitUntil(checkAndNotify());
